@@ -1,9 +1,9 @@
 pragma solidity ^0.4.16;
 
 import "../utils/SafeMath.sol";
-import "./StandardToken.sol";
+import "./AdvancedToken.sol";
 
-contract MintableToken is StandardToken {
+contract MintableToken is AdvancedToken {
 
     event Mint(address indexed to, uint256 amount);
     event MintFinished();
