@@ -1,14 +1,16 @@
 pragma solidity ^0.4.16;
 
-import "./StandardToken.sol";
-import "./Multiownable.sol";
+
+import "./token/MintableToken.sol";
 import "./currencies/BitcoinNodeProccess.sol";
-import "./Console.sol";
+import "./utils/Multiownable.sol";
+import "./utils/Console.sol";
+
 
 // @notice ICO contract
 // @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
 // Capped by maximum number of tokens; Time constrained
-contract ICO is StandardToken, BitcoinNodeProccess, Multiownable, Console {
+contract ICO is MintableToken, BitcoinNodeProccess, Multiownable, Console {
   using SafeMath for uint256;
   uint256 public tokensSold = 0;
 

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.16;
 
-import "./SafeMath.sol";
+import "../utils/SafeMath.sol";
 /**
  * @notice Standard ERC20 token
  *
@@ -12,7 +12,6 @@ contract StandardToken {
   using SafeMath for uint256;
   
   uint256 public totalSupply;
-
   mapping(address => uint256) balances;
 
   /**
@@ -112,47 +111,10 @@ contract StandardToken {
     return true;
   }
 
-
-
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
 
 
 
-
-  event Mint(address indexed to, uint256 amount);
-  event MintFinished();
-
-  bool public mintingFinished = false;
-
-
-  modifier canMint() {
-    require(!mintingFinished);
-    _;
-  }
-
-  /**
-   * @dev Function to mint tokens
-   * @param _to The address that will receive the minted tokens.
-   * @param _amount The amount of tokens to mint.
-   * @return A boolean that indicates if the operation was successful.
-   */
-  function mint(address _to, uint256 _amount) internal canMint returns (bool) {
-    totalSupply = totalSupply.add(_amount);
-    balances[_to] = balances[_to].add(_amount);
-    Mint(_to, _amount);
-    Transfer(0x0, _to, _amount);
-    return true;
-  }
-
-  /**
-   * @dev Function to stop minting new tokens.
-   * @return True if the operation was successful.
-   */
-  function finishMinting() internal returns (bool) {
-    mintingFinished = true;
-    MintFinished();
-    return true;
-  }
 
 }

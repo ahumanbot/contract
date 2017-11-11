@@ -1,5 +1,6 @@
 pragma solidity ^0.4.16;
-import "./BitconBTC.sol";
+
+import "../utils/BitcoinBTC.sol";
 
 contract BTCProccess {
 
@@ -20,9 +21,6 @@ contract BTCProccess {
       (n_outputs, pos) = BTC.parseVarInt(txn, pos);
       halt = n_outputs;     
 
-      log0("outputs");
-
-      log(txn);
 
       for (uint8 i = 0; i < halt; i++) {
           uint256 _value = BTC.getBytesLE(txn, pos, 64);
