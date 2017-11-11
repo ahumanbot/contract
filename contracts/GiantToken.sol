@@ -10,7 +10,7 @@ import "./utils/Console.sol";
 // @notice ICO contract
 // @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
 // Capped by maximum number of tokens; Time constrained
-contract ICO is MintableToken, BitcoinNodeProccess, Multiownable, Console {
+contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console {
   using SafeMath for uint256;
   uint256 public tokensSold = 0;
 
@@ -58,9 +58,8 @@ contract ICO is MintableToken, BitcoinNodeProccess, Multiownable, Console {
   mapping(address => bytes) bitcoinAdresses;
 
   event TokenPurchase(address indexed purchaser, uint256 value, uint256 amount);
-  // @notice Constructor
-  // @param _startTime: A timestamp for when the sale is to start.
-  // @param _wallet - The wallet where the token sale proceeds are to be withdrawn
+
+
   function ICO(uint256 _tokenCap, uint256 _numberOfTeamTokens, uint256 _startTime, address _wallet, address _teamWallet) {
     require(_wallet != 0x0);
     require(_teamWallet != 0x0);
