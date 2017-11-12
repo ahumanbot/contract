@@ -12,8 +12,8 @@ contract('', function(accounts) {
   var ownerAccount = accounts[0];
     
   const params = {
-    _tokenCap: 500,
-    _numberOfTeamTokens: 100,
+    _tokenCap: 21000000,
+    _numberOfTeamTokens: 3000000,
     _startTime: 0,
     _wallet: ownerAccount,
     _teamWallet: ownerAccount
@@ -22,16 +22,10 @@ contract('', function(accounts) {
   var instance;
   var pow = Math.pow(10, 18);
 
-  before('Setup contract', async function() {
-    //instance = await GiantToken.new(...Object.values(params));
-    
-    
+  before('Setup contract', async function() {   
     GiantToken.deployed().then(function(_instance) {
-        instance = _instance;
-
-        
+        instance = _instance;        
     })
-    
   })
   
 
@@ -57,9 +51,9 @@ contract('', function(accounts) {
     })
   })
 
-  it("Should check that ICO is not finished", function(done) {
+  it("Should check that ICO is not ended", function(done) {
     instance.hasEnded.call().then(function(value) {
-      assert.equal(value, false, "ICO is finished but should not")
+      assert.equal(value, false, "ICO is ended but should not")
       done()
     })
   })
@@ -89,13 +83,6 @@ contract('', function(accounts) {
     })
   })
 
-  it("Investor should have 242 tokens", function(done) {
-    instance.balanceOf(accounts[3]).then(function(balance) {
-        assert.equal(242550000000000000000, balance.valueOf(), "Number of tokens is invalid");
-        done()
-    });
-  });
-
 
   function printBalances(accounts) {
     accounts.forEach(function(ac, i) {
@@ -103,51 +90,4 @@ contract('', function(accounts) {
     })
   }
 
-    /*
-    before('setup contract for each test', async function () {
-        ico = await ICO.new(...Object.values(params))
-    })
-    it('has an owner', async function () {
-        assert.equal(await ico.owner(), accounts[0])
-    })
-    it('assigns team tokens', async function() {
-        console.log(await ico.getNumberOfTeamTokens.call())
-    })
-    */
-  /*
-
-  // A convenience to view account balances in the console before making changes.
-  //printBalances(accounts)
-  // Create a test case for retreiving the deployed ICO.
-  // We pass 'done' to allow us to step through each test synchronously.
-  it("Should retrive deployed ICO.", function(done) {
-    // Check if our instance has deployed
-    ICO.deployed().then(function(instance) {
-      // Assign our contract instance for later use
-      ico = instance
-
-      // Pass test if we have an object returned.
-      assert.isOk(ico)
-      // Tell Mocha move on to the next sequential test.
-      done()
-    })
-  })
-
-  it('has an owner', function (done) {
-    assert.equal(ico.owner(), owner)
-
-    done()
-  })
-  
-  it("Should check amount of tokens on team account.", function(done) {
-      
-    done()  
-  })
-  
-  
-
-  // Utility function to display the balances of each account.
-  
-
-  */
 })

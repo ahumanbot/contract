@@ -1,8 +1,7 @@
 pragma solidity ^0.4.16;
 
 
-import "./token/MintableToken.sol";
-import "./currencies/BitcoinNodeProccess.sol";
+import "./token/BitcoinToken.sol";
 import "./utils/Multiownable.sol";
 import "./utils/Console.sol";
 
@@ -10,7 +9,7 @@ import "./utils/Console.sol";
 // @notice ICO contract
 // @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
 // Capped by maximum number of tokens; Time constrained
-contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console {
+contract GiantToken is BitcoinToken, Multiownable, Console {
   using SafeMath for uint256;
   uint256 public tokensSold = 0;
 
@@ -47,30 +46,25 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
 
   // Number of tokens that will be released for project team USD
   uint256 public numberOfTeamTokens = 3000000 * 10**18;
+  
   // Team wallet where team tokens will be send
   address public teamWallet;
 
   // The address where the funds are withdrawn
   address public wallet;
+
   // Bitcoint address where the funds are withdrawn
   address public bitcoinwallet;
 
-  
+  // Amount of ethereum sended by each address
+  mapping(address => uint) public ethSend;
 
-  // Bitcoin addresses where income will be send
-  mapping(address => bytes) bitcoinAdresses;
-
-  event TokenPurchase(address indexed purchaser, uint256 value, uint256 amount);
-
-
-  function GiantToken(address _teamWallet) {
+  function GiantToken() {
     startTime = now;
     endTime = now.add(7 days);
 
     wallet = msg.sender;
-    if (_teamWallet == 0x0) {
-      teamWallet = msg.sender;
-    }
+    teamWallet = msg.sender;
 
     mint(this, tokenCap);
     mint(teamWallet, numberOfTeamTokens);
@@ -127,34 +121,25 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   }
 
   function hasEnded() public constant returns (bool) {
-    return now > endTime || isSucceed();
+    return now > endTime;
   }
 
   function isSucceed() public constant returns (bool) {
-    return tokensSold >= tokenCap;
+    return tokensSold >= softCap;
   }
 
-  // @notice Withdraw money by owner if ICO is ended and succeed
+  // @notice "multisig" withdraw if soft cap is reached
   function withdraw() payable onlyManyOwners {
-    require(hasEnded());
     require(isSucceed());
     wallet.transfer(msg.value);
   }
 
+  // @notice refund on ico ended and soft cap not reached
   function refund() public {
     require(hasEnded() && !isSucceed());
 
-
+    uint256 value = ethSend[msg.sender];
+    ethSend[msg.sender] = 0;
+    msg.sender.transfer(value); 
   }
-
-  // @notice end ICO. if ending requirements met ICO will stop
-  function endICO() {
-    require(hasEnded());
-    if (isSucceed()) {
-      
-    } else {
-      
-    }
-  }
-
 }

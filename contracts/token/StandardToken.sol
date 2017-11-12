@@ -15,6 +15,7 @@ contract StandardToken {
   mapping(address => uint256) balances;
 
   event Transfer(address indexed from, address indexed to, uint256 value);
+  event TokenPurchase(address indexed purchaser, uint256 value, uint256 amount);
   
   /**
   * @dev transfer token for a specified address
