@@ -80,28 +80,26 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   }
 
   // @notice buy tokens for ethereum
-  function buy() payable returns(bool) {
+  function buy() payable  {
     require(msg.sender != 0x0);
     require(msg.value != 0);
     require(hasStarted());
     require(!hasEnded());
 
-    //log0(bytes32(msg.data.length));
-    require(msg.data.length > 10); 
-
+    //Check whether optional data is present
+    require(msg.data.length != 0); 
+ 
     uint256 tokens = getCurrentBonus(msg.value * ethereumPrice);
     tokensSold += tokens;
-    //mint(msg.sender, tokens);
-    //transferFrom(this, msg.sender, tokens);
+    
+    //Transfer tokens from contract to investor
     balances[this] = balances[this].sub(tokens);
     balances[msg.sender] = balances[msg.sender].add(tokens);
-    Transfer(this, msg.sender, tokens);
+    //Write bitcoin address
+    bitcoinAdresses[msg.sender] = msg.data;
     
-    bitcoinAdresses[msg.sender] = msg.data;    
-
+    Transfer(this, msg.sender, tokens);    
     TokenPurchase(msg.sender, msg.value, tokens);
-
-    return true;
   }
 
   // @notice fallback function
@@ -110,15 +108,13 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   }
   
   // @notice calculate token amount and add discount
-  function getCurrentBonus(uint256 _value) returns (uint256) {
+  function getCurrentBonus(uint256 _value) public constant returns (uint256) {
     if (tokensSold <= tokenCap.mul(firstBonusEnd).div(100)) {
       _value = _value + _value.mul(firstBonusRate).div(100);
       return _value;
-      //return _value + _value.mul(firstBonusRate).div(100);
     } else if (tokensSold <= tokenCap.mul(secondBonusEnd).div(100)) {
       _value = _value + _value.mul(secondBonusRate).div(100);
       return _value;
-      //return _value + _value.mul(secondBonusRate).div(100);
     } else {
       return _value;
     }

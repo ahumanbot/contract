@@ -64,13 +64,12 @@ contract('', function(accounts) {
     })
   })
 
-  /*
-  it("Should deposit 1 ether", function(done) {
-    instance.buy({from:accounts[3], to:instance.address, value: web3.utils.toWei(0.33, "ether")})
+  it("Should buy 128.7 tokens for 0.33 ether", function(done) {
+    instance.buy({from: accounts[3], value: web3.utils.toWei(0.33, "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB "})
     .then(function(tx) {
       assert.isOk(tx.receipt)
-
-      done()
+      
+      done();
     }, function(error) {
         //{from:accounts[3], to:ico.address, value: web3.toWei(1, "ether")}
         console.error(error)
@@ -78,7 +77,13 @@ contract('', function(accounts) {
         done()
       })
   })
-  */
+
+  it("Should check balance of buyer", function(done) {
+    instance.balanceOf(accounts[3]).then(function(balance) {
+        assert.isBelow(128.7 * pow - balance.valueOf(), 0.1, "Number of tokens is invalid");
+        done()
+    });
+  });
 
   function printBalances(accounts) {
     accounts.forEach(function(ac, i) {
