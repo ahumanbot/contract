@@ -40,10 +40,13 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   uint256 public constant ethereumPrice = 300;
 
   // Number of tokens that will be released for sale
-  uint256 public tokenCap;
+  uint256 public tokenCap = 21000000 * 10**18;
+
+  // Minimum summ to achieve
+  uint256 public softCap = 400000 * 10**18;
 
   // Number of tokens that will be released for project team USD
-  uint256 public numberOfTeamTokens;
+  uint256 public numberOfTeamTokens = 3000000 * 10**18;
   // Team wallet where team tokens will be send
   address public teamWallet;
 
@@ -60,16 +63,14 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   event TokenPurchase(address indexed purchaser, uint256 value, uint256 amount);
 
 
-  function GiantToken(uint256 _tokenCap, uint256 _numberOfTeamTokens, uint256 _startTime, address _wallet, address _teamWallet) {
-    require(_wallet != 0x0);
-    require(_teamWallet != 0x0);
-
-    tokenCap = _tokenCap * 10**18;
-    numberOfTeamTokens = _numberOfTeamTokens * 10**18;
-    startTime = _startTime;
+  function GiantToken(address _teamWallet) {
+    startTime = now;
     endTime = now.add(7 days);
-    wallet = _wallet;
-    teamWallet = _teamWallet;
+
+    wallet = msg.sender;
+    if (_teamWallet == 0x0) {
+      teamWallet = msg.sender;
+    }
 
     mint(this, tokenCap);
     mint(teamWallet, numberOfTeamTokens);
@@ -130,7 +131,7 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   }
 
   function isSucceed() public constant returns (bool) {
-    return tokensSold >= tokenCap.mul(95).div(100);
+    return tokensSold >= tokenCap;
   }
 
   // @notice Withdraw money by owner if ICO is ended and succeed
@@ -138,6 +139,12 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
     require(hasEnded());
     require(isSucceed());
     wallet.transfer(msg.value);
+  }
+
+  function refund() public {
+    require(hasEnded() && !isSucceed());
+
+
   }
 
   // @notice end ICO. if ending requirements met ICO will stop

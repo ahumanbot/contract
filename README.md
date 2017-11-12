@@ -11,14 +11,10 @@ pyepm deploy/deployRelay.yaml -a 0xfb31cb45d058b0f2e13c24eacd39230d74c4f6f5
 
 
 #BITCOIN
-After having installed Bitcoin core on your machine, run the following command to start synchronising the testnet blockchain
+https://github.com/bitpay/insight
+https://stackoverflow.com/questions/31025159/installing-nodejs-without-sudo-in-ubuntu
+killall -9 bitcoind
 
-bitcoind -testnet -daemon
+https://bitcore.io/guides/full-node/
 
-The synchronisation starts as a daemon and runs in the background, you can issue the following the command to see the progress
 
-tailf ~/.bitcoin/testnet3/debug.log
-
-To access the command line apis , just add the -testnet parameter
-
-bitcoin-cli -testnet getinfo

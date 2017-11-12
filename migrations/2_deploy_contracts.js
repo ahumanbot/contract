@@ -28,6 +28,6 @@ module.exports = function(deployer) {
   var account = "0x0faa3915e53a8c835670cd53ff71863002aa2313";
 
   startTime = 0;
-  deployer.deploy(GiantToken, 300, 100, startTime, account, account);
+  deployer.deploy(GiantToken, "");
   
 };
