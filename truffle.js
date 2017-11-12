@@ -7,13 +7,14 @@ module.exports = {
       host: 'localhost',
       port: 8545,
       network_id: '*', // Match any network id
-      gas: 4556000
+      gas: 4556000,
+      //from: "0xe430cc643580e8fcfc9fa4a37fc7f623ed77d43a"
     },
-    private: {
+    ropsten: {
       host: 'localhost',
       port: 8545,
       network_id: '*', // Match any network id
-      gas: 6056000
-    }
+      gas: 4556000
+    },
   }
 }

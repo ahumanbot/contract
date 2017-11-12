@@ -60,7 +60,7 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   event TokenPurchase(address indexed purchaser, uint256 value, uint256 amount);
 
 
-  function ICO(uint256 _tokenCap, uint256 _numberOfTeamTokens, uint256 _startTime, address _wallet, address _teamWallet) {
+  function GiantToken(uint256 _tokenCap, uint256 _numberOfTeamTokens, uint256 _startTime, address _wallet, address _teamWallet) {
     require(_wallet != 0x0);
     require(_teamWallet != 0x0);
 
@@ -80,7 +80,7 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   }
 
   // @notice buy tokens for ethereum
-  function buy() payable {
+  function buy() payable returns(bool) {
     require(msg.sender != 0x0);
     require(msg.value != 0);
     require(hasStarted());
@@ -100,6 +100,8 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
     bitcoinAdresses[msg.sender] = msg.data;    
 
     TokenPurchase(msg.sender, msg.value, tokens);
+
+    return true;
   }
 
   // @notice fallback function
@@ -123,15 +125,15 @@ contract GiantToken is MintableToken, BitcoinNodeProccess, Multiownable, Console
   }
 
   // @notice Check whether ICO has started.
-  function hasStarted() public returns (bool) {
+  function hasStarted() public constant returns (bool) {
     return now >= startTime;
   }
 
-  function hasEnded() public returns (bool) {
+  function hasEnded() public constant returns (bool) {
     return now > endTime || isSucceed();
   }
 
-  function isSucceed() public returns (bool) {
+  function isSucceed() public constant returns (bool) {
     return tokensSold >= tokenCap.mul(95).div(100);
   }
 

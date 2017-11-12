@@ -2,7 +2,7 @@
 geth --networkid 3 --rpc --rpccorsdomain "*" --rpcapi "admin,debug,miner,shh,txpool,personal,eth,net,web3" --unlock 0 --cache=1024 console
 
 #SETTING PRIVATE NETWORK
-npm install -g ethereumjs-testrpc
+geth --datadir "~/apps/lap" --port 30304 --nodiscover console networkid 7234789234
 
 
 #DEPLOY BTC RELAY

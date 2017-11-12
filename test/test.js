@@ -1,8 +1,11 @@
 require("babel-polyfill");
 const Web3 = require('web3')
 let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-let ICO = artifacts.require("./ICO")
+let GiantToken = artifacts.require("./GiantToken.sol", )
+let StandardToken = artifacts.require("./token/StandardToken.sol");
 
+
+//web3.currentProvider.send({jsonrpc: "2.0", method: "evm_increaseTime", params: [86400], id: 0})
 
 contract('', function(accounts) {
 
@@ -16,29 +19,54 @@ contract('', function(accounts) {
     _teamWallet: ownerAccount
   };
 
-  var ico;
+  var instance;
   var pow = Math.pow(10, 18);
 
   before('Setup contract', async function() {
-    ico = await ICO.new(...Object.values(params));
+    //instance = await GiantToken.new(...Object.values(params));
     
-    /*
-    ICO.deployed().then(function(instance) {
-        ico = instance;
+    
+    GiantToken.deployed().then(function(_instance) {
+        instance = _instance;
+
+        
     })
-    */
+    
   })
   
 
   it("Should check number of team tokens", function(done) {
-    ico.balanceOf.call(ownerAccount).then(function(balance) {
+    instance.balanceOf.call(ownerAccount).then(function(balance) {
         assert.equal(balance.valueOf(), params._numberOfTeamTokens * pow, "Number of team tokens is invalid");
         done()
     });
   });
 
+
+  it("Should check is ico started", function(done) {
+    instance.hasStarted.call().then(function(isStarted) {
+      assert.equal(isStarted, true, "ICO not started but should")
+      done()
+    })
+  })
+
+  it("Should check that is is not succeed", function(done) {
+    instance.isSucceed.call().then(function(value) {
+      assert.equal(value, false, "ICO is succeed but should not");
+      done();
+    })
+  })
+
+  it("Should check that is is not finished", function(done) {
+    instance.hasEnded.call().then(function(value) {
+      assert.equal(value, false, "ICO is finished but should not")
+      done()
+    })
+  })
+
+  /*
   it("Should deposit 1 ether", function(done) {
-    ico.buy({from:accounts[3], to:ico.address, value: web3.toWei(0.33, "ether")})
+    instance.buy({from:accounts[3], to:instance.address, value: web3.utils.toWei(0.33, "ether")})
     .then(function(tx) {
       assert.isOk(tx.receipt)
 
@@ -50,6 +78,13 @@ contract('', function(accounts) {
         done()
       })
   })
+  */
+
+  function printBalances(accounts) {
+    accounts.forEach(function(ac, i) {
+      console.log(i, web3.fromWei(web3.eth.getBalance(ac), 'ether').toNumber())
+    })
+  }
 
     /*
     before('setup contract for each test', async function () {
@@ -95,11 +130,7 @@ contract('', function(accounts) {
   
 
   // Utility function to display the balances of each account.
-  function printBalances(accounts) {
-    accounts.forEach(function(ac, i) {
-      console.log(i, web3.fromWei(web3.eth.getBalance(ac), 'ether').toNumber())
-    })
-  }
+  
 
   */
 })

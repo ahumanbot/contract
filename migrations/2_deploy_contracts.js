@@ -24,7 +24,10 @@ module.exports = function(deployer) {
   //deployer.deploy(BTC);
   //deployer.link(BTC, ICO);
   
+  //var account = "0x52b31F0C56eea2F4D9c7795877D470D3a9D6903b";
+  var account = "0xc7f300d5c069d3f63d83d8517fddef887e367bfd";
+
   startTime = 0;
-  deployer.deploy(GiantToken, 500, 100, startTime, "0x52b31F0C56eea2F4D9c7795877D470D3a9D6903b", "0x52b31F0C56eea2F4D9c7795877D470D3a9D6903b");
+  deployer.deploy(GiantToken, 500, 100, startTime, account, account);
   
 };
