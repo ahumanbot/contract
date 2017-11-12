@@ -43,47 +43,59 @@ contract('', function(accounts) {
   });
 
 
-  it("Should check is ico started", function(done) {
+  it("Should check that ICO is started", function(done) {
     instance.hasStarted.call().then(function(isStarted) {
       assert.equal(isStarted, true, "ICO not started but should")
       done()
     })
   })
 
-  it("Should check that is is not succeed", function(done) {
+  it("Should check that ICO is not succeed", function(done) {
     instance.isSucceed.call().then(function(value) {
       assert.equal(value, false, "ICO is succeed but should not");
       done();
     })
   })
 
-  it("Should check that is is not finished", function(done) {
+  it("Should check that ICO is not finished", function(done) {
     instance.hasEnded.call().then(function(value) {
       assert.equal(value, false, "ICO is finished but should not")
       done()
     })
   })
 
-  it("Should buy 128.7 tokens for 0.33 ether", function(done) {
-    instance.buy({from: accounts[3], value: web3.utils.toWei(0.33, "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB "})
+  it("Sending 0.33 ether", function(done) {
+    instance.buy({from: accounts[3], value: web3.utils.toWei(0.33, "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB"})
     .then(function(tx) {
-      assert.isOk(tx.receipt)
-      
+      assert.isOk(tx.receipt)      
       done();
-    }, function(error) {
-        //{from:accounts[3], to:ico.address, value: web3.toWei(1, "ether")}
-        console.error(error)
-        assert.equal(true, false);
-        done()
-      })
+    })
   })
 
-  it("Should check balance of buyer", function(done) {
+  it("Investor should have 128 tokens", function(done) {
     instance.balanceOf(accounts[3]).then(function(balance) {
-        assert.isBelow(128.7 * pow - balance.valueOf(), 0.1, "Number of tokens is invalid");
+        assert.equal(128700000000000000000, balance.valueOf(), "Number of tokens is invalid");
         done()
     });
   });
+
+
+
+  it("Sending 0.33 ether", function(done) {
+    instance.buy({from: accounts[3], value: web3.utils.toWei(0.33, "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB"})
+    .then(function(tx) {
+      assert.isOk(tx.receipt)      
+      done();
+    })
+  })
+
+  it("Investor should have 242 tokens", function(done) {
+    instance.balanceOf(accounts[3]).then(function(balance) {
+        assert.equal(242550000000000000000, balance.valueOf(), "Number of tokens is invalid");
+        done()
+    });
+  });
+
 
   function printBalances(accounts) {
     accounts.forEach(function(ac, i) {
