@@ -1,10 +1,8 @@
 pragma solidity ^0.4.16;
 
-
 import "./token/BitcoinToken.sol";
 import "./utils/Multiownable.sol";
 import "./utils/Console.sol";
-
 
 // @notice ICO contract
 // @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed

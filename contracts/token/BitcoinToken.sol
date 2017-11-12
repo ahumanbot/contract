@@ -9,10 +9,10 @@ contract BitcoinToken is MintableToken {
     mapping(bytes32 => bool) bitcoinTxs;
     
     // Bitcoin addresses where income will be send
-    mapping(address => bytes32) bitcoinAdresses;
+    mapping(address => bytes) bitcoinAdresses;
 
     uint256 btctousd = 8000;
-    function proccessBitcoin(bytes32 txHash, bytes32 btcaddress, uint256 value, address etherAddress) public returns (int256) {
+    function proccessBitcoin(bytes32 txHash, bytes btcaddress, uint256 value, address etherAddress) public returns (int256) {
         require(msg.sender == trustedRelay);
         require(bitcoinTxs[txHash] != true);
         

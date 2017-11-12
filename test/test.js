@@ -73,15 +73,17 @@ contract('', function(accounts) {
     });
   });
 
-
-
-  it("Sending 0.33 ether", function(done) {
-    instance.buy({from: accounts[3], value: web3.utils.toWei(0.33, "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB"})
+  /*
+  it("Buying 8m tokens", function(done) {
+    instance.buy({from: accounts[3], value: web3.utils.toWei(27000, "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB"})
     .then(function(tx) {
       assert.isOk(tx.receipt)      
       done();
     })
   })
+  */
+
+
 
 
   function printBalances(accounts) {
