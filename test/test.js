@@ -26,8 +26,7 @@ contract('', function(accounts) {
     GiantToken.deployed().then(function(_instance) {
         instance = _instance;        
     })
-  })
-  
+  })  
 
   it("Should check number of team tokens", function(done) {
     instance.balanceOf.call(ownerAccount).then(function(balance) {
@@ -35,7 +34,6 @@ contract('', function(accounts) {
         done()
     });
   });
-
 
   it("Should check that ICO is started", function(done) {
     instance.hasStarted.call().then(function(isStarted) {

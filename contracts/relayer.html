@@ -1,0 +1,27 @@
+<html>
+<head>
+    <script src="assets/js/jquery-2.1.3.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    
+    <script src="assets/js/btcRelayAbi.js"></script>
+    
+    <script src="assets/js/bignumber.js"></script>
+    <script src="assets/js/web3.min.js"></script>
+</head>
+<body>
+
+
+http://localhost:3001/insight-api/addr/n3GNqMveyvaPvUbH469vDRadqpJMPc84JA
+<script>
+ if (typeof web3 !== 'undefined') {
+    web3 = new Web3(web3.currentProvider);
+} else {
+    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+}
+
+var gRelayAddr = '0x86685897956dbdfc596ed69ee8141bf639396350';
+var RelayContractClass = web3.eth.contract(btcRelayAbi);
+
+</script>
+</body>
+</html>

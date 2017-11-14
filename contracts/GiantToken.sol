@@ -30,6 +30,7 @@ contract GiantToken is BitcoinToken, Multiownable, Console {
 
   // Percent of summ needed to reach to finish first stage
   uint256 public constant firstBonusEnd = 30;
+
   // Percent of summ needed to reach to finish second stage
   uint256 public constant secondBonusEnd = 60;
 
@@ -73,7 +74,7 @@ contract GiantToken is BitcoinToken, Multiownable, Console {
   }
 
   // @notice buy tokens for ethereum
-  function buy() payable  {
+  function buy() payable {
     require(msg.sender != 0x0);
     require(msg.value != 0);
     require(hasStarted());
