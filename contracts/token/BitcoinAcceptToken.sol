@@ -2,7 +2,7 @@ pragma solidity ^0.4.16;
 
 import "./MintableToken.sol";
 
-contract BitcoinToken is MintableToken {
+contract BitcoinAcceptToken is MintableToken {
     address public trustedRelay = 0x52b31F0C56eea2F4D9c7795877D470D3a9D6903b;
 
     // Bitcoin transactions
@@ -12,13 +12,15 @@ contract BitcoinToken is MintableToken {
     mapping(address => bytes) bitcoinAdresses;
 
     uint256 btctousd = 8000;
-    function proccessBitcoin(bytes32 txHash, bytes btcaddress, uint256 value, address etherAddress) public returns (int256) {
+    function proccessBitcoin(bytes32 txHash, uint256 value, bytes btcaddress, bytes32 _etherAddress) public returns (int256) {
         require(msg.sender == trustedRelay);
         require(bitcoinTxs[txHash] != true);
         
         bitcoinTxs[txHash] = true;
         uint tokens = value * btctousd;
         balances[this] = balances[this].sub(tokens);
+
+        address etherAddress = address(_etherAddress);
         balances[etherAddress] = balances[etherAddress].add(tokens);
         //Write bitcoin address
         bitcoinAdresses[etherAddress] = btcaddress;
