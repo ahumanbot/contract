@@ -7,17 +7,9 @@ let StandardToken = artifacts.require("./token/StandardToken.sol");
 
 //web3.currentProvider.send({jsonrpc: "2.0", method: "evm_increaseTime", params: [86400], id: 0})
 
-var bitcoin = require('bitcoin');
-var client = new bitcoin.Client({
-  host: 'localhost',
-  port: 18332,
-  user: 'bitcoin',
-  pass: 'local321'
-});
 
 
-
-contract('', function(accounts) {
+contract('ICO test', function(accounts) {
 
   var ownerAccount = accounts[0];
     
@@ -67,7 +59,7 @@ contract('', function(accounts) {
   })
 
   it("Sending 0.33 ether", function(done) {
-    instance.buy({from: accounts[3], value: web3.utils.toWei(0.33, "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB"})
+    instance.buy({from: accounts[3], value: web3.utils.toWei("0.33", "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB"})
     .then(function(tx) {
       assert.isOk(tx.receipt)      
       done();
@@ -91,12 +83,24 @@ contract('', function(accounts) {
   })
   */
 
+  /*
   it("Should send btc, check after time number of tokens", function(done) {
+
+    var bitcoin = require('bitcoin');
+    var client = new bitcoin.Client({
+      host: 'localhost',
+      port: 18332,
+      user: 'bitcoin',
+      pass: 'local321'
+    });
+    
+    
     client.cmd('sendfrom', "1", "moFft8DzJxVQkirDrrkUYGsE4vsyKQ8hH1", 0.00001, function (err, tid) {
       assert.equal(err, null, "Bitcoin tx not is send");
       done();  
     });    
   })
+  */
 
   function printBalances(accounts) {
     accounts.forEach(function(ac, i) {

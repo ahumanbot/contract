@@ -1,13 +1,13 @@
 pragma solidity ^0.4.16;
 
-import "./token/StandardToken.sol";
+import "./token/BitcoinAcceptToken.sol";
 import "./utils/Multiownable.sol";
 //import "./utils/Console.sol";
 
 // @notice ICO contract
 // @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
 // Capped by maximum number of tokens; Time constrained
-contract GiantToken is StandardToken, Multiownable {
+contract GiantToken is BitcoinAcceptToken, Multiownable {
   using SafeMath for uint256;
   uint256 public tokensSold = 0;
 
@@ -41,15 +41,15 @@ contract GiantToken is StandardToken, Multiownable {
   uint256 public constant ethereumPrice = 300;
 
   // Number of tokens that will be released for sale
-  //uint256 public tokenCap = 21000000 * 10**18;
-  uint256 public tokenCap = 400 * 10**18;
+  uint256 public tokenCap = 21000000 * 10**18;
+  //uint256 public tokenCap = 400 * 10**18;
 
   // Minimum summ to achieve
-  uint256 public softCap = 40 * 10**18;
+  uint256 public softCap = 400000 * 10**18;
 
   // Number of tokens that will be released for project team USD
-  //uint256 public numberOfTeamTokens = 3000000 * 10**18;
-  uint256 public numberOfTeamTokens = 300 * 10**18;
+  uint256 public numberOfTeamTokens = 3000000 * 10**18;
+  //uint256 public numberOfTeamTokens = 300 * 10**18;
   
   // Team wallet where team tokens will be send
   address public teamWallet;
@@ -80,38 +80,12 @@ contract GiantToken is StandardToken, Multiownable {
     //mint(teamWallet, numberOfTeamTokens);
   }
 
-  address public trustedRelay = 0x52b31F0C56eea2F4D9c7795877D470D3a9D6903b;
-
-  // Bitcoin transactions
-  mapping(bytes32 => bool) bitcoinTxs;
-  
-  // Bitcoin addresses where income will be send
-  mapping(address => bytes) bitcoinAdresses;
-
-  uint256 btctousd = 8000;
-  function proccessBitcoin(bytes32 txHash, uint256 value, bytes btcaddress, bytes32 _etherAddress) public returns (int256) {
-      require(msg.sender == trustedRelay);
-      require(bitcoinTxs[txHash] != true);
-      
-      bitcoinTxs[txHash] = true;
-      uint tokens = value * btctousd;
-      balances[this] = balances[this].sub(tokens);
-
-      address etherAddress = address(_etherAddress);
-      balances[etherAddress] = balances[etherAddress].add(tokens);
-      //Write bitcoin address
-      bitcoinAdresses[etherAddress] = btcaddress;
-      
-      Transfer(this, msg.sender, tokens);    
-      TokenPurchase(msg.sender, msg.value, tokens);     
-  }
-
   function getNumberOfTeamTokens() public constant returns(uint256) {
     return numberOfTeamTokens;
   }
 
   // @notice buy tokens for ethereum
-  function buy() payable {
+  function buy() payable returns(uint256) {
     require(msg.sender != 0x0);
     require(msg.value != 0);
     require(hasStarted());
