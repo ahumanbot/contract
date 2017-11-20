@@ -7,7 +7,7 @@ import "./utils/Multiownable.sol";
 // @notice ICO contract
 // @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
 // Capped by maximum number of tokens; Time constrained
-contract GiantToken is BitcoinAcceptToken, Multiownable {
+contract GiantToken is BitcoinAcceptToken {
   using SafeMath for uint256;
   uint256 public tokensSold = 0;
 
@@ -41,14 +41,14 @@ contract GiantToken is BitcoinAcceptToken, Multiownable {
   uint256 public constant ethereumPrice = 300;
 
   // Number of tokens that will be released for sale
-  uint256 public tokenCap = 21000000 * 10**18;
+  uint256 public constant tokenCap = 21000000 * 10**18;
   //uint256 public tokenCap = 400 * 10**18;
 
   // Minimum summ to achieve
-  uint256 public softCap = 400000 * 10**18;
+  uint256 public constant softCap = 400000 * 10**18;
 
   // Number of tokens that will be released for project team USD
-  uint256 public numberOfTeamTokens = 3000000 * 10**18;
+  uint256 public constant numberOfTeamTokens = 3000000 * 10**18;
   //uint256 public numberOfTeamTokens = 300 * 10**18;
   
   // Team wallet where team tokens will be send
@@ -80,7 +80,7 @@ contract GiantToken is BitcoinAcceptToken, Multiownable {
     //mint(teamWallet, numberOfTeamTokens);
   }
 
-  function getNumberOfTeamTokens() public constant returns(uint256) {
+  function getNumberOfTeamTokens() public view returns(uint256) {
     return numberOfTeamTokens;
   }
 
@@ -113,7 +113,7 @@ contract GiantToken is BitcoinAcceptToken, Multiownable {
   }
   
   // @notice calculate token amount and add discount
-  function getCurrentBonus(uint256 _value) public constant returns (uint256) {
+  function getCurrentBonus(uint256 _value) public view returns (uint256) {
     if (tokensSold <= tokenCap.mul(firstBonusEnd).div(100)) {
       _value = _value + _value.mul(firstBonusRate).div(100);
       return _value;
@@ -126,15 +126,15 @@ contract GiantToken is BitcoinAcceptToken, Multiownable {
   }
 
   // @notice Check whether ICO has started.
-  function hasStarted() public constant returns (bool) {
+  function hasStarted() public view returns (bool) {
     return now >= startTime;
   }
 
-  function hasEnded() public constant returns (bool) {
+  function hasEnded() public view returns (bool) {
     return now > endTime;
   }
 
-  function isSucceed() public constant returns (bool) {
+  function isSucceed() public view returns (bool) {
     return tokensSold >= softCap;
   }
 

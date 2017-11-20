@@ -11,6 +11,15 @@ let StandardToken = artifacts.require("./token/StandardToken.sol");
 
 contract('ICO test', function(accounts) {
 
+  var bitcoin = require('bitcoin');
+  var client = new bitcoin.Client({
+    host: 'localhost',
+    port: 18332,
+    user: 'bitcoin',
+    pass: 'local321'
+  });
+
+
   var ownerAccount = accounts[0];
     
   const params = {
@@ -83,24 +92,26 @@ contract('ICO test', function(accounts) {
   })
   */
 
-  /*
-  it("Should send btc, check after time number of tokens", function(done) {
-
-    var bitcoin = require('bitcoin');
-    var client = new bitcoin.Client({
-      host: 'localhost',
-      port: 18332,
-      user: 'bitcoin',
-      pass: 'local321'
-    });
-    
-    
+  it("Should send btc, check after time number of tokens", function(done) {    
     client.cmd('sendfrom', "1", "moFft8DzJxVQkirDrrkUYGsE4vsyKQ8hH1", 0.00001, function (err, tid) {
       assert.equal(err, null, "Bitcoin tx not is send");
       done();  
     });    
   })
-  */
+
+  it("Should check is it trusted relay and return true", function(done) {
+    instance.isTrustedRelay({from: accounts[0]}).then(function(isTrusted) {
+      assert.equal(isTrusted, true, "Relay should be trusted");
+      done();
+    })
+  })
+
+  it("Should check is it trusted relay and return false", function(done) {
+    instance.isTrustedRelay({from: accounts[1]}).then(function(isTrusted) {
+      assert.equal(isTrusted, false, "Relay should not be trusted");
+      done();
+    })
+  })
 
   function printBalances(accounts) {
     accounts.forEach(function(ac, i) {
