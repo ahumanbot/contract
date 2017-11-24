@@ -7,7 +7,7 @@ import "./utils/Multiownable.sol";
 // @notice ICO contract
 // @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
 // Capped by maximum number of tokens; Time constrained
-contract GiantToken is BitcoinAcceptToken {
+contract GiantICO is BitcoinAcceptToken {
   using SafeMath for uint256;
   uint256 public tokensSold = 0;
 
@@ -22,6 +22,7 @@ contract GiantToken is BitcoinAcceptToken {
 
   // Start timestamp when investments are open to the public.
   uint256 public startTime;
+
   // End time. investments can only go up to this timestamp.
   uint256 public endTime;
 
@@ -63,24 +64,29 @@ contract GiantToken is BitcoinAcceptToken {
   // Amount of ethereum sended by each address
   mapping(address => uint) public ethSend;
 
-  function GiantToken() {
-    startTime = now;
-    endTime = now.add(7 days);
+  function GiantICO(uint _startTime, uint _endTime) {
+    //require(_startTime >= now - 15 minutes);
+    //require(_endTime > _startTime);
+
+    startTime = _startTime;
+    endTime = _endTime;
 
     wallet = msg.sender;
     teamWallet = msg.sender;
 
+    /*
     totalSupply = totalSupply.add(tokenCap);
     balances[this] = tokenCap;
 
     totalSupply = totalSupply.add(numberOfTeamTokens);
     balances[teamWallet] = numberOfTeamTokens;
+    */
 
-    //mint(this, tokenCap);
-    //mint(teamWallet, numberOfTeamTokens);
+    mint(this, tokenCap);
+    mint(teamWallet, numberOfTeamTokens);
   }
 
-  function getNumberOfTeamTokens() public view returns(uint256) {
+  function getNumberOfTeamTokens() public constant returns(uint256) {
     return numberOfTeamTokens;
   }
 
@@ -88,8 +94,8 @@ contract GiantToken is BitcoinAcceptToken {
   function buy() payable returns(uint256) {
     require(msg.sender != 0x0);
     require(msg.value != 0);
-    require(hasStarted());
-    require(!hasEnded());
+    require(isStarted());
+    require(!isEnded());
 
     //Check whether optional data is present
     require(msg.data.length != 0); 
@@ -113,7 +119,7 @@ contract GiantToken is BitcoinAcceptToken {
   }
   
   // @notice calculate token amount and add discount
-  function getCurrentBonus(uint256 _value) public view returns (uint256) {
+  function getCurrentBonus(uint256 _value) public constant returns (uint256) {
     if (tokensSold <= tokenCap.mul(firstBonusEnd).div(100)) {
       _value = _value + _value.mul(firstBonusRate).div(100);
       return _value;
@@ -126,15 +132,15 @@ contract GiantToken is BitcoinAcceptToken {
   }
 
   // @notice Check whether ICO has started.
-  function hasStarted() public view returns (bool) {
+  function isStarted() public constant returns (bool) {
     return now >= startTime;
   }
 
-  function hasEnded() public view returns (bool) {
+  function isEnded() public constant returns (bool) {
     return now > endTime;
   }
 
-  function isSucceed() public view returns (bool) {
+  function isSucceed() public constant returns (bool) {
     return tokensSold >= softCap;
   }
 
@@ -146,10 +152,29 @@ contract GiantToken is BitcoinAcceptToken {
 
   // @notice refund on ico ended and soft cap not reached
   function refund() public {
-    require(hasEnded() && !isSucceed());
+    require(isEnded() && !isSucceed());
 
     uint256 value = ethSend[msg.sender];
     ethSend[msg.sender] = 0;
     msg.sender.transfer(value); 
+  }
+
+
+
+
+
+  /******************************************************* */
+  /* DEVELOPMENT CODE */
+
+  function _getTime() public constant returns(uint) {
+    return now;
+  }
+
+  function _getStartTime() public constant returns(uint) {
+    return startTime;
+  }
+
+  function _getEndTime() public constant returns(uint) {
+    return endTime;
   }
 }

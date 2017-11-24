@@ -1,15 +1,31 @@
+import { setTimeout } from "timers";
+
 require("babel-polyfill");
 const Web3 = require('web3')
+Web3.providers.HttpProvider.prototype.sendAsync = Web3.providers.HttpProvider.prototype.send
 let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-let GiantToken = artifacts.require("./GiantToken.sol", )
-let StandardToken = artifacts.require("./token/StandardToken.sol");
+
+let GiantICO = artifacts.require("./GiantICO.sol")
 
 
-//web3.currentProvider.send({jsonrpc: "2.0", method: "evm_increaseTime", params: [86400], id: 0})
+var request = require('request')
+
+function setTime(_time, callback) {
+  request({
+    url: "http://localhost:8546",
+    method: "POST",
+    json: true,   
+    body: {time: _time},
+    timeout: 1000,
+  }, function (error, response, body){
+      callback()
+  });
+}
 
 
+setTime((new Date()).getTime() / 1000, function() {})
 
-contract('ICO test', function(accounts) {
+contract('ICO start tests', function(accounts) {
 
   var bitcoin = require('bitcoin');
   var client = new bitcoin.Client({
@@ -18,7 +34,6 @@ contract('ICO test', function(accounts) {
     user: 'bitcoin',
     pass: 'local321'
   });
-
 
   var ownerAccount = accounts[0];
     
@@ -31,11 +46,11 @@ contract('ICO test', function(accounts) {
   };
 
   var instance;
-  var pow = Math.pow(10, 18);
+  var pow = Math.pow(10, 18);  
 
   before('Setup contract', async function() {   
-    GiantToken.deployed().then(function(_instance) {
-        instance = _instance;        
+    GiantICO.deployed().then(function(_instance) {
+      instance = _instance;        
     })
   })  
 
@@ -47,10 +62,19 @@ contract('ICO test', function(accounts) {
   });
 
   it("Should check that ICO is started", function(done) {
-    instance.hasStarted.call().then(function(isStarted) {
-      assert.equal(isStarted, true, "ICO not started but should")
-      done()
+    instance.isStarted.call().then(function(isStarted) {
+      //assert.equal(isStarted, true, "ICO not started but should")
+
+      instance._getTime.call().then(function(time) {
+        
+        console.log(time)
+
+        done()
+      })
+      
     })
+
+    
   })
 
   it("Should check that ICO is not succeed", function(done) {
@@ -61,7 +85,7 @@ contract('ICO test', function(accounts) {
   })
 
   it("Should check that ICO is not ended", function(done) {
-    instance.hasEnded.call().then(function(value) {
+    instance.isEnded.call().then(function(value) {
       assert.equal(value, false, "ICO is ended but should not")
       done()
     })
@@ -76,7 +100,7 @@ contract('ICO test', function(accounts) {
   })
 
   it("Investor should have 128 tokens", function(done) {
-    instance.balanceOf(accounts[3]).then(function(balance) {
+    instance.balanceOf.call(accounts[3]).then(function(balance) {
         assert.equal(128700000000000000000, balance.valueOf(), "Number of tokens is invalid");
         done()
     });
@@ -92,6 +116,7 @@ contract('ICO test', function(accounts) {
   })
   */
 
+
   it("Should send btc, check after time number of tokens", function(done) {    
     client.cmd('sendfrom', "1", "moFft8DzJxVQkirDrrkUYGsE4vsyKQ8hH1", 0.00001, function (err, tid) {
       assert.equal(err, null, "Bitcoin tx not is send");
@@ -99,11 +124,13 @@ contract('ICO test', function(accounts) {
     });    
   })
 
-  it("Should check is it trusted relay and return true", function(done) {
-    instance.isTrustedRelay({from: accounts[0]}).then(function(isTrusted) {
-      assert.equal(isTrusted, true, "Relay should be trusted");
-      done();
-    })
+  it("Should set trusted relay and check is it and return true", function(done) {
+    instance.setTrustedRelay(accounts[0]).then(function() {
+      instance.isTrustedRelay({from: accounts[0]}).then(function(isTrusted) {
+        assert.equal(isTrusted, true, "Relay should be trusted");
+        done();
+      })
+    })    
   })
 
   it("Should check is it trusted relay and return false", function(done) {
@@ -113,11 +140,26 @@ contract('ICO test', function(accounts) {
     })
   })
 
-  function printBalances(accounts) {
-    accounts.forEach(function(ac, i) {
-      console.log(i, web3.fromWei(web3.eth.getBalance(ac), 'ether').toNumber())
+  it("Should check is ico ended", function(done) {
+    instance.isEnded.call().then(function(value) {
+      assert.equal(value, false, "ICO is ended but should not");
+
+      //web3.currentProvider.send({jsonrpc: "2.0", method: "evm_increaseTime", params: [86400 * 7], id: 0})
+      done();
     })
-  }
+  })
+
+  
+
+  /*
+  it("Should check that ICO is failed", function(done) {
+    instance.isSucceed.call().then(function(value) {
+      assert.equal(value, false, "ICO is succeed but should not");
+      done();
+    })      
+  })
+  */
+
 
 })
 

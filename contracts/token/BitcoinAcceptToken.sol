@@ -28,6 +28,8 @@ contract BitcoinAcceptToken is MintableToken, Multiownable {
         
         Transfer(this, msg.sender, tokens);    
         TokenPurchase(msg.sender, msg.value, tokens);     
+
+        return 1;
     }
 
     function isTxProccessed(bytes32 txHash) public view returns (bool) {

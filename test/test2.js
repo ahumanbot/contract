@@ -1,0 +1,103 @@
+require("babel-polyfill");
+const Web3 = require('web3')
+Web3.providers.HttpProvider.prototype.sendAsync = Web3.providers.HttpProvider.prototype.send
+const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545")) // Hardcoded development port
+
+let GiantICO = artifacts.require("./GiantICO.sol")
+
+/*
+const timeTravel = function (time) {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_increaseTime",
+      params: [time], // 86400 is num seconds in day
+      id: new Date().getTime()
+    }, (err, result) => {
+      if(err){ return reject(err) }
+      return resolve(result)
+    });
+  })
+}
+
+const mineBlock = function () {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_mine"
+    }, (err, result) => {
+      if(err){ return reject(err) }
+      return resolve(result)
+    });
+  })
+}
+*/
+
+var request = require('request')
+
+function setTime(_time, callback) {
+  request({
+    url: "http://localhost:8546",
+    method: "POST",
+    json: true,   
+    body: {time: _time},
+    timeout: 1000,
+  }, function (error, response, body){
+      callback()
+  });
+}
+
+
+
+contract('After 7 days tests', function(accounts) {
+  /*
+  it("Should check is ICO not ended", async function () {
+    let instance = await GiantICO.deployed();
+    
+    let time1 = await instance._getTime.call();
+    let time2 = await instance._getEndTime.call();
+    console.log(time1 + ' ////////// ' + time2)
+
+    let value = await instance.isEnded.call();
+    assert.equal(value, false, "Should be not ended")
+  });
+  */
+
+  /*
+  it("Should time travel and check is ICO ended", async function () {
+    let instance = await GiantICO.deployed();
+
+    let time1 = await instance._getTime.call();
+    let time2 = await instance._getEndTime.call();
+    console.log(time1 + ' ////////// ' + time2 + ' ///////// ' + (time2 - time1))
+
+    setTime(0, function() {
+      
+
+      let value = await instance.isEnded.call();
+      assert.equal(value, true, "Should be ended")
+    })   
+  });
+
+  */
+  var instance;
+  before('Setup contract', async function() {   
+    GiantICO.deployed().then(function(_instance) {
+      instance = _instance;        
+    })
+  })  
+
+  it("Should forward time for 7 days and check is ico ended", function(done) {
+    setTime((new Date()).getTime() / 1000 + 86400 * 7, function(response) {
+      web3.currentProvider.sendAsync({
+        jsonrpc: "2.0",
+        method: "evm_mine"
+      }, (err, result) => {
+        instance.isEnded.call().then(function(value) {
+          assert.equal(value, true, "ICO is not ended but should");
+          done()
+        })  
+      });      
+    })        
+  })
+});
