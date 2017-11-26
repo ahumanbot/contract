@@ -15,8 +15,8 @@ contract BitcoinAcceptToken is MintableToken, Multiownable {
 
     uint256 satoshitousd = 12500;
     function proccessBitcoin(bytes txId, uint256 value, bytes btcaddress, address _etherAddress) public returns (int256) {
-        //require(isTrustedRelay());
-        //require(isTxProccessed(txId) == false);
+        require(isTrustedRelay());
+        require(!isTxProccessed(txId));
 
         bitcoinTxs[txId] = true;
         uint tokens = value.div(satoshitousd);
@@ -34,7 +34,7 @@ contract BitcoinAcceptToken is MintableToken, Multiownable {
     }
 
     function isTxProccessed(bytes txId) public view returns (bool) {
-        return bitcoinTxs[txId] != true;
+        return bitcoinTxs[txId] == true;
     }
 
     function isTrustedRelay() public view returns (bool) {

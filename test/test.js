@@ -7,25 +7,7 @@ let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 
 let GiantICO = artifacts.require("./GiantICO.sol")
 
-
-var request = require('request')
-
-function setTime(_time, callback) {
-  request({
-    url: "http://localhost:8546",
-    method: "POST",
-    json: true,   
-    body: {time: _time},
-    timeout: 1000,
-  }, function (error, response, body){
-      callback()
-  });
-}
-
-
-setTime((new Date()).getTime() / 1000, function() {})
-
-contract('ICO start tests', function(accounts) {
+contract('General tests', function(accounts) {
 
   var bitcoin = require('bitcoin');
   var client = new bitcoin.Client({
@@ -119,10 +101,6 @@ contract('ICO start tests', function(accounts) {
       })
     })    
   })
-
-  function proccessBitcoin(txid, txsumm, callback) {
-         
-  }
 
   it("Should send btc, check after time number of tokens", function(done) {    
     var amountToBuy = 10 * 12500;

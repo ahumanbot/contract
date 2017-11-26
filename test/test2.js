@@ -5,7 +5,6 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545")) 
 
 let GiantICO = artifacts.require("./GiantICO.sol")
 
-/*
 const timeTravel = function (time) {
   return new Promise((resolve, reject) => {
     web3.currentProvider.sendAsync({
@@ -31,7 +30,6 @@ const mineBlock = function () {
     });
   })
 }
-*/
 
 var request = require('request')
 
@@ -49,7 +47,7 @@ function setTime(_time, callback) {
 
 
 
-contract('After 7 days tests', function(accounts) {
+contract('Time travel tests', function(accounts) {
   
   var instance;
   before('Setup contract', async function() {   
@@ -58,7 +56,17 @@ contract('After 7 days tests', function(accounts) {
     })
   })  
 
-  it("Should forward time for 7 days and check is ico ended", function(done) {
+  it("Should forward time for 3 days and check that ico is still not ended", function(done) {
+    timeTravel(86400 * 7).then(function(res) {
+      mineBlock().then(function(res) {
+        instance.isEnded.call().then(function(value) {
+          assert.equal(value, true, "ICO is ended but should");
+          done()
+        })  
+      })
+    })
+
+    /*
     setTime((new Date()).getTime() / 1000 + 86400 * 7, function(response) {
       web3.currentProvider.sendAsync({
         jsonrpc: "2.0",
@@ -69,6 +77,21 @@ contract('After 7 days tests', function(accounts) {
           done()
         })  
       });      
-    })        
+    })       
+    */
+    
   })
+
+
+  it("Should forward time for 4 days and check is ico ended", function(done) {
+    timeTravel(86400 * 7).then(function(res) {
+      mineBlock().then(function(res) {
+        instance.isEnded.call().then(function(value) {
+          assert.equal(value, true, "ICO is not ended but should");
+          done()
+        })  
+      })
+    })
+  });
+
 });
