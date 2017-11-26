@@ -21,7 +21,7 @@ contract('General tests', function(accounts) {
     
   const params = {
     _tokenCap: 21000000,
-    _numberOfTeamTokens: 3000000,
+    _numberOfTeamTokens: 100,
     _startTime: 0,
     _wallet: ownerAccount,
     _teamWallet: ownerAccount
@@ -102,11 +102,9 @@ contract('General tests', function(accounts) {
   it("Should send btc, check after time number of tokens", function(done) {    
     var amountToBuy = 10 * 12500;
 
-
     client.cmd('sendfrom', "1", "moFft8DzJxVQkirDrrkUYGsE4vsyKQ8hH1", amountToBuy / Math.pow(10, 8), function (err, txid) {
       assert.equal(err, null, "Bitcoin tx not is send");
-        var bitcoinAddr = "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB";        
-        var objParam = { from: accounts[0], gas: 4560000 };
+        var bitcoinAddr = "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB";      
         instance.proccessBitcoin(txid, amountToBuy, bitcoinAddr, accounts[4]).then(function(result) {
             instance.balanceOf.call(accounts[4]).then(function(balance) {
                 assert.equal(10, balance, "Number of tokens is invalid");
@@ -124,7 +122,7 @@ contract('General tests', function(accounts) {
     })
   })
 
-  it("Should check is ico ended", function(done) {
+  it("Should check that ico is not ended", function(done) {
     instance.isEnded.call().then(function(value) {
       assert.equal(value, false, "ICO is ended but should not");
 
@@ -133,13 +131,55 @@ contract('General tests', function(accounts) {
     })
   })
 
-  /*
-  it("Should check that ICO is failed", function(done) {
+  it("Should check that ICO is not failed", function(done) {
     instance.isSucceed.call().then(function(value) {
       assert.equal(value, false, "ICO is succeed but should not");
       done();
     })      
   })
-  */
+
+  it("Sending 0.33 * 1000 ether", function(done) {
+    instance.buy({from: accounts[5], value: web3.utils.toWei("0.33", "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB"})
+    .then(function(tx) {
+      assert.isOk(tx.receipt)      
+      done();
+    })
+  })
+
+  it("Sending 0.33 * 1000 ether", function(done) {
+    instance.buy({from: accounts[6], value: web3.utils.toWei("0.33", "ether"), data: "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB"})
+    .then(function(tx) {
+      assert.isOk(tx.receipt)      
+      done();
+    })
+  })
+
+
+  it("Should check number of tokens", function(done) {
+    function balance(i) {
+      return function() {
+        instance.balanceOf.call(accounts[i]).then(function(balance) {
+          console.log(accounts[i] + ':' + balance)        
+        });
+      }
+    }
+    for (var i = 0; i < accounts.length; i++) {
+      balance(i)()
+    }
+
+    setTimeout(function() {
+      done()
+    }, 1000)
+    
+  });
+
+  it("Should check that ICO is succeed", function(done) {
+    instance.isSucceed.call().then(function(value) {
+      assert.equal(value, true, "ICO is not succeed but should");
+      done();
+    })      
+  })
+
+  
 })
 

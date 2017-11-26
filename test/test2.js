@@ -32,7 +32,7 @@ const evm_snapshot = function () {
 }
 
 
-const resetTime = function (_id) {
+const evm_revert = function (_id) {
   return new Promise((resolve, reject) => {
     web3.currentProvider.sendAsync({
       jsonrpc: "2.0",
@@ -76,30 +76,32 @@ function setTime(_time, callback) {
 contract('Time travel tests', function(accounts) {
   
   var instance;
+  var snap_id;
+  var pow = Math.pow(10, 18); 
+
   before('Setup contract', async function() {   
     GiantICO.deployed().then(function(_instance) {
       instance = _instance;        
     })
   })  
 
-  var snap_id;
-
   it("Should forward time for 3 days and check that ico is still not ended", function(done) {
+    /*
     evm_snapshot().then(function(_snap_id) {
       snap_id = _snap_id
       console.log(snap_id)
 
-      timeTravel(86400 * 7).then(function(res) {
-        mineBlock().then(function(res) {
-          instance.isEnded.call().then(function(value) {
-            assert.equal(value, true, "ICO is ended but should");
-            done()
-          })  
-        })
+      
+    })
+    */
+    timeTravel(86400 * 7).then(function(res) {
+      mineBlock().then(function(res) {
+        instance.isEnded.call().then(function(value) {
+          assert.equal(value, true, "ICO is ended but should");
+          done()
+        })  
       })
     })
-
-    
 
     /*
     setTime((new Date()).getTime() / 1000 + 86400 * 7, function(response) {
@@ -124,12 +126,32 @@ contract('Time travel tests', function(accounts) {
         instance.isEnded.call().then(function(value) {
           assert.equal(value, true, "ICO is not ended but should");
 
-          resetTime(snap_id).then(function() {
+          done()
+          /*
+          evm_revert(snap_id).then(function() {
             done()
           })
+          */
         })  
       })
     })
   });
+
+  it("Should check that ICO is started", function(done) {
+    instance.isStarted.call().then(function(isStarted) {
+      assert.equal(isStarted, true, "ICO not started but should")
+      done()
+    })
+  })
+
+  it("Should check that ICO is not succeed", function(done) {
+    instance.isSucceed.call().then(function(value) {
+      assert.equal(value, false, "ICO is succeed but should not");
+      done();
+    })
+  })
+
+  
+
 
 });

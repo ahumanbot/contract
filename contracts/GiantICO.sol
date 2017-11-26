@@ -42,21 +42,20 @@ contract GiantICO is BitcoinAcceptToken {
   uint256 public constant ethereumPrice = 300;
 
   // Number of tokens that will be released for sale
-  uint256 public constant tokenCap = 21000000 * 10**18;
+  uint256 public tokenCap = 21000000 * 10**18;
   //uint256 public tokenCap = 400 * 10**18;
 
   // Minimum summ to achieve
-  uint256 public constant softCap = 400000 * 10**18;
+  uint256 public softCap = 400000 * 10**18;
 
   // Number of tokens that will be released for project team USD
-  uint256 public constant numberOfTeamTokens = 3000000 * 10**18;
-  //uint256 public numberOfTeamTokens = 300 * 10**18;
-  
-  // Team wallet where team tokens will be send
-  address public teamWallet;
+  uint256 public numberOfTeamTokens = 3000000 * 10**18;
 
   // The address where the funds are withdrawn
   address public wallet;
+  
+  // Team wallet where team tokens will be send
+  address public teamWallet;
 
   // Bitcoint address where the funds are withdrawn
   address public bitcoinwallet;
@@ -64,9 +63,13 @@ contract GiantICO is BitcoinAcceptToken {
   // Amount of ethereum sended by each address
   mapping(address => uint) public ethSend;
 
-  function GiantICO(uint _startTime, uint _endTime) {
+  function GiantICO(uint _startTime, uint _endTime, uint256 _tokenCap, uint256 _numberOfTeamTokens, uint256 _softCap) {
     //require(_startTime >= now - 15 minutes);
     //require(_endTime > _startTime);
+
+    tokenCap = _tokenCap * 10**18;
+    numberOfTeamTokens = _numberOfTeamTokens * 10**18;
+    softCap = _softCap * 10**18;
 
     startTime = _startTime;
     endTime = _endTime;
@@ -78,10 +81,6 @@ contract GiantICO is BitcoinAcceptToken {
     mint(teamWallet, numberOfTeamTokens);
 
     setTrustedRelay(msg.sender);
-  }
-
-  function getNumberOfTeamTokens() public constant returns(uint256) {
-    return numberOfTeamTokens;
   }
 
   // @notice buy tokens for ethereum
@@ -170,5 +169,9 @@ contract GiantICO is BitcoinAcceptToken {
 
   function _getEndTime() public constant returns(uint) {
     return endTime;
+  }
+
+  function _getNumberOfTeamTokens() public constant returns(uint256) {
+    return numberOfTeamTokens;
   }
 }
