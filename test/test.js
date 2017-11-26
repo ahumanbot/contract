@@ -45,11 +45,8 @@ contract('General tests', function(accounts) {
 
   it("Should check that ICO is started", function(done) {
     instance.isStarted.call().then(function(isStarted) {
-      //assert.equal(isStarted, true, "ICO not started but should")
-      instance._getTime.call().then(function(time) {
-        console.log(time)
-        done()
-      })     
+      assert.equal(isStarted, true, "ICO not started but should")
+      done()
     })
   })
 

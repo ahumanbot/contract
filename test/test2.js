@@ -10,8 +10,34 @@ const timeTravel = function (time) {
     web3.currentProvider.sendAsync({
       jsonrpc: "2.0",
       method: "evm_increaseTime",
-      params: [time], // 86400 is num seconds in day
+      params: [time], 
       id: new Date().getTime()
+    }, (err, result) => {
+      if(err){ return reject(err) }
+      return resolve(result)
+    });
+  })
+}
+
+const evm_snapshot = function () {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_snapshot"
+    }, (err, result) => {
+      if(err){ return reject(err) }
+      return resolve(result.result)
+    });
+  })
+}
+
+
+const resetTime = function (_id) {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_revert",
+      id: _id
     }, (err, result) => {
       if(err){ return reject(err) }
       return resolve(result)
@@ -56,15 +82,24 @@ contract('Time travel tests', function(accounts) {
     })
   })  
 
+  var snap_id;
+
   it("Should forward time for 3 days and check that ico is still not ended", function(done) {
-    timeTravel(86400 * 7).then(function(res) {
-      mineBlock().then(function(res) {
-        instance.isEnded.call().then(function(value) {
-          assert.equal(value, true, "ICO is ended but should");
-          done()
-        })  
+    evm_snapshot().then(function(_snap_id) {
+      snap_id = _snap_id
+      console.log(snap_id)
+
+      timeTravel(86400 * 7).then(function(res) {
+        mineBlock().then(function(res) {
+          instance.isEnded.call().then(function(value) {
+            assert.equal(value, true, "ICO is ended but should");
+            done()
+          })  
+        })
       })
     })
+
+    
 
     /*
     setTime((new Date()).getTime() / 1000 + 86400 * 7, function(response) {
@@ -84,11 +119,14 @@ contract('Time travel tests', function(accounts) {
 
 
   it("Should forward time for 4 days and check is ico ended", function(done) {
-    timeTravel(86400 * 7).then(function(res) {
+    timeTravel(86400 * 4).then(function(res) {
       mineBlock().then(function(res) {
         instance.isEnded.call().then(function(value) {
           assert.equal(value, true, "ICO is not ended but should");
-          done()
+
+          resetTime(snap_id).then(function() {
+            done()
+          })
         })  
       })
     })
