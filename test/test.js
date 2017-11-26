@@ -64,17 +64,11 @@ contract('ICO start tests', function(accounts) {
   it("Should check that ICO is started", function(done) {
     instance.isStarted.call().then(function(isStarted) {
       //assert.equal(isStarted, true, "ICO not started but should")
-
       instance._getTime.call().then(function(time) {
-        
         console.log(time)
-
         done()
-      })
-      
+      })     
     })
-
-    
   })
 
   it("Should check that ICO is not succeed", function(done) {
@@ -116,14 +110,7 @@ contract('ICO start tests', function(accounts) {
   })
   */
 
-
-  it("Should send btc, check after time number of tokens", function(done) {    
-    client.cmd('sendfrom', "1", "moFft8DzJxVQkirDrrkUYGsE4vsyKQ8hH1", 0.00001, function (err, tid) {
-      assert.equal(err, null, "Bitcoin tx not is send");
-      done();  
-    });    
-  })
-
+  
   it("Should set trusted relay and check is it and return true", function(done) {
     instance.setTrustedRelay(accounts[0]).then(function() {
       instance.isTrustedRelay({from: accounts[0]}).then(function(isTrusted) {
@@ -131,6 +118,28 @@ contract('ICO start tests', function(accounts) {
         done();
       })
     })    
+  })
+
+  function proccessBitcoin(txid, txsumm, callback) {
+         
+  }
+
+  it("Should send btc, check after time number of tokens", function(done) {    
+    var amountToBuy = 10 * 12500;
+
+
+    client.cmd('sendfrom', "1", "moFft8DzJxVQkirDrrkUYGsE4vsyKQ8hH1", amountToBuy / Math.pow(10, 8), function (err, txid) {
+      assert.equal(err, null, "Bitcoin tx not is send");
+        var bitcoinAddr = "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB";        
+        var objParam = { from: accounts[0], gas: 4560000 };
+        instance.proccessBitcoin(txid, amountToBuy, bitcoinAddr, accounts[4]).then(function(result) {
+            instance.balanceOf.call(accounts[4]).then(function(balance) {
+                assert.equal(10, balance, "Number of tokens is invalid");
+                done()
+            });
+          }
+        );       
+    });    
   })
 
   it("Should check is it trusted relay and return false", function(done) {
@@ -149,8 +158,6 @@ contract('ICO start tests', function(accounts) {
     })
   })
 
-  
-
   /*
   it("Should check that ICO is failed", function(done) {
     instance.isSucceed.call().then(function(value) {
@@ -159,7 +166,5 @@ contract('ICO start tests', function(accounts) {
     })      
   })
   */
-
-
 })
 

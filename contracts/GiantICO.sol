@@ -74,16 +74,10 @@ contract GiantICO is BitcoinAcceptToken {
     wallet = msg.sender;
     teamWallet = msg.sender;
 
-    /*
-    totalSupply = totalSupply.add(tokenCap);
-    balances[this] = tokenCap;
-
-    totalSupply = totalSupply.add(numberOfTeamTokens);
-    balances[teamWallet] = numberOfTeamTokens;
-    */
-
     mint(this, tokenCap);
     mint(teamWallet, numberOfTeamTokens);
+
+    setTrustedRelay(msg.sender);
   }
 
   function getNumberOfTeamTokens() public constant returns(uint256) {

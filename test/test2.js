@@ -50,36 +50,7 @@ function setTime(_time, callback) {
 
 
 contract('After 7 days tests', function(accounts) {
-  /*
-  it("Should check is ICO not ended", async function () {
-    let instance = await GiantICO.deployed();
-    
-    let time1 = await instance._getTime.call();
-    let time2 = await instance._getEndTime.call();
-    console.log(time1 + ' ////////// ' + time2)
-
-    let value = await instance.isEnded.call();
-    assert.equal(value, false, "Should be not ended")
-  });
-  */
-
-  /*
-  it("Should time travel and check is ICO ended", async function () {
-    let instance = await GiantICO.deployed();
-
-    let time1 = await instance._getTime.call();
-    let time2 = await instance._getEndTime.call();
-    console.log(time1 + ' ////////// ' + time2 + ' ///////// ' + (time2 - time1))
-
-    setTime(0, function() {
-      
-
-      let value = await instance.isEnded.call();
-      assert.equal(value, true, "Should be ended")
-    })   
-  });
-
-  */
+  
   var instance;
   before('Setup contract', async function() {   
     GiantICO.deployed().then(function(_instance) {
