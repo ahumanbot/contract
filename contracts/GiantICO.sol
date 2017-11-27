@@ -153,9 +153,6 @@ contract GiantICO is BitcoinAcceptToken {
   }
 
 
-
-
-
   /******************************************************* */
   /* DEVELOPMENT CODE */
 

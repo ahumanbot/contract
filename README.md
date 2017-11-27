@@ -1,5 +1,7 @@
 #CONNECTING GETH TO ROPSTEN
-geth --networkid 3 --rpc --rpccorsdomain "*" --rpcapi "admin,debug,miner,shh,txpool,personal,eth,net,web3" --unlock 0 --cache=1024 console
+geth --networkid 3 --rpc --rpccorsdomain "*" --rpcapi "admin,debug,miner,shh,txpool,personal,eth,net,web3" --unlock 0 --cache=1024 --datadir="/media/qq/SSD/geth/testnet" console
+
+
 
 mist --rpc /media/qq/SSD/geth/testnet/geth.ipc --swarmurl="http://swarm-gateways.net" --network test 
 
