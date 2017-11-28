@@ -2,8 +2,9 @@ pragma solidity ^0.4.16;
 
 import "./MintableToken.sol";
 import "../utils/Multiownable.sol";
+import "../utils/Console.sol";
 
-contract BitcoinAcceptToken is MintableToken, Multiownable {
+contract BitcoinAcceptToken is MintableToken, Multiownable, Console {
 
     // Address of node which proccess bitcoin transactions
     address public trustedRelay;
@@ -16,8 +17,9 @@ contract BitcoinAcceptToken is MintableToken, Multiownable {
 
     uint256 satoshitousd = 12500;
 
+    /*
     modifier notProccessed(bytes txId) {
-        if (bitcoinTxs[txId] == true) throw;
+        if (isTxProccessed(txId)) throw;
         _;
     }
 
@@ -25,15 +27,33 @@ contract BitcoinAcceptToken is MintableToken, Multiownable {
         if (msg.sender != trustedRelay) throw;
         _;
     }
+    */
+
+    function isTxProccessed(bytes txId) constant returns (bool) {
+        return (bitcoinTxs[txId] == true);
+    }
+
+    function isTrustedRelay() returns (bool) {
+        return (msg.sender == trustedRelay);        
+    }
 
     function setTrustedRelay(address _relay) public onlyMainOwner returns (bool) {
         trustedRelay = _relay;
         return true;
     }
 
-    function proccessBitcoin(bytes txId, uint256 value, bytes btcaddress, address _etherAddress) public isTrustedRelay notProccessed(txId) returns (int256) {
+    //isTrustedRelay notProccessed(txId) 
+    function proccessBitcoin(bytes txId, uint256 value, bytes btcaddress, address _etherAddress) public {
+        require(isTrustedRelay());
+        require(!isTxProccessed(txId));
+
+        LogBytes("Inited");
+        
         bitcoinTxs[txId] = true;
         uint tokens = value.div(satoshitousd);
+
+        LogBytes("Divided");
+
         balances[this] = balances[this].sub(tokens);
 
         //address etherAddress = address(_etherAddress);
@@ -44,8 +64,6 @@ contract BitcoinAcceptToken is MintableToken, Multiownable {
         Transfer(this, msg.sender, tokens);    
         Transfer(msg.sender, this, value); // Display how much BTC received
         TokenPurchase(msg.sender, msg.value, tokens);     
-
-        return 1;
     }
 
     

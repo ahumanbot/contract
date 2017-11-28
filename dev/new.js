@@ -1,4 +1,5 @@
 var bitcoin = require('bitcoin');
+var fs = require('fs');
 
 var client = new bitcoin.Client({
     host: 'localhost',
@@ -8,15 +9,12 @@ var client = new bitcoin.Client({
 });
 
 
-var fs = require('fs');
+
 
 
 client.cmd('getnewaddress', "1", function (err, address) {
     console.log(address)
-    var amountToBuy = 10 * 12600;
-    client.cmd('sendfrom', "1", address, amountToBuy / Math.pow(10, 8), function (err, txid) {
-        console.log(txid)
-    });    
+    
 
     fs.writeFile("bitcoin.txt", address, function(err) {
         if(err) {
