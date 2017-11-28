@@ -7,7 +7,7 @@ import "./utils/Multiownable.sol";
 // @notice ICO contract
 // @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
 // Capped by maximum number of tokens; Time constrained
-contract GiantICO is BitcoinAcceptToken {
+contract ICO is BitcoinAcceptToken {
   using SafeMath for uint256;
   uint256 public tokensSold = 0;
 
@@ -63,7 +63,7 @@ contract GiantICO is BitcoinAcceptToken {
   // Amount of ethereum sended by each address
   mapping(address => uint) public ethSend;
 
-  function GiantICO(uint _startTime, uint _endTime, uint256 _tokenCap, uint256 _numberOfTeamTokens, uint256 _softCap) {
+  function ICO(uint _startTime, uint _endTime, uint256 _tokenCap, uint256 _numberOfTeamTokens, uint256 _softCap) {
     //require(_startTime >= now - 15 minutes);
     //require(_endTime > _startTime);
 
@@ -152,23 +152,4 @@ contract GiantICO is BitcoinAcceptToken {
     msg.sender.transfer(value); 
   }
 
-
-  /******************************************************* */
-  /* DEVELOPMENT CODE */
-
-  function _getTime() public constant returns(uint) {
-    return now;
-  }
-
-  function _getStartTime() public constant returns(uint) {
-    return startTime;
-  }
-
-  function _getEndTime() public constant returns(uint) {
-    return endTime;
-  }
-
-  function _getNumberOfTeamTokens() public constant returns(uint256) {
-    return numberOfTeamTokens;
-  }
 }

@@ -12,7 +12,7 @@ contract StandardToken {
   using SafeMath for uint256;
   
   uint256 public totalSupply;
-  mapping(address => uint256) balances;
+  mapping(address => uint256) public balances;
 
   event Transfer(address indexed from, address indexed to, uint256 value);
   event TokenPurchase(address indexed purchaser, uint256 value, uint256 amount);

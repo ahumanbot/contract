@@ -3,7 +3,7 @@ const Web3 = require('web3')
 Web3.providers.HttpProvider.prototype.sendAsync = Web3.providers.HttpProvider.prototype.send
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545")) // Hardcoded development port
 
-let GiantICO = artifacts.require("./GiantICO.sol")
+let ICO = artifacts.require("./ICO.sol")
 
 const timeTravel = function (time) {
   return new Promise((resolve, reject) => {
@@ -80,7 +80,7 @@ contract('Time travel tests', function(accounts) {
   var pow = Math.pow(10, 18); 
 
   before('Setup contract', async function() {   
-    GiantICO.deployed().then(function(_instance) {
+    ICO.deployed().then(function(_instance) {
       instance = _instance;        
     })
   })  

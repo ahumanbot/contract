@@ -5,7 +5,7 @@ const Web3 = require('web3')
 Web3.providers.HttpProvider.prototype.sendAsync = Web3.providers.HttpProvider.prototype.send
 let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 var bitcoin = require('bitcoin');
-let GiantICO = artifacts.require("./GiantICO.sol")
+let ICO = artifacts.require("./ICO.sol")
 
 contract('General tests', function(accounts) {
 
@@ -30,7 +30,7 @@ contract('General tests', function(accounts) {
   var pow = Math.pow(10, 18);  
 
   before('Setup contract', async function() {   
-    GiantICO.deployed().then(function(_instance) {
+    ICO.deployed().then(function(_instance) {
       instance = _instance;        
     })
   })  
@@ -89,10 +89,10 @@ contract('General tests', function(accounts) {
   */
 
   
-  it("Should set trusted relay and check is it and return true", function(done) {
+  it("Should set trusted relay and check is it set and return true", function(done) {
     instance.setTrustedRelay(accounts[0]).then(function() {
-      instance.isTrustedRelay({from: accounts[0]}).then(function(isTrusted) {
-        assert.equal(isTrusted, true, "Relay should be trusted");
+      instance.trustedRelay({from: accounts[0]}).then(function(trustedRelay) {
+        assert.equal(trustedRelay, accounts[0], "Relay should be trusted");
         done();
       })
     })    
@@ -104,7 +104,6 @@ contract('General tests', function(accounts) {
     client.cmd('sendfrom', "1", "mtWfgtZwC3WvpobfufTATm2oFcQDmi8JY5", amountToBuy / Math.pow(10, 8), function (err, txid) {
       assert.equal(err, null, "Bitcoin tx not is send");
         var bitcoinAddr = "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB";      
-        /*
         instance.proccessBitcoin(txid, amountToBuy, bitcoinAddr, accounts[4]).then(function(result) {
             instance.balanceOf.call(accounts[4]).then(function(balance) {
                 assert.equal(10, balance, "Number of tokens is invalid");
@@ -112,16 +111,7 @@ contract('General tests', function(accounts) {
             });
           }
         );   
-        
-        */
     });    
-  })
-
-  it("Should check is it trusted relay and return false", function(done) {
-    instance.isTrustedRelay({from: accounts[1]}).then(function(isTrusted) {
-      assert.equal(isTrusted, false, "Relay should not be trusted");
-      done();
-    })
   })
 
   it("Should check that ico is not ended", function(done) {
@@ -156,7 +146,7 @@ contract('General tests', function(accounts) {
     })
   })
 
-
+  /*
   it("Should check number of tokens", function(done) {
     function balance(i) {
       return function() {
@@ -174,6 +164,7 @@ contract('General tests', function(accounts) {
     }, 1000)
     
   });
+  */
 
   it("Should check that ICO is succeed", function(done) {
     instance.isSucceed.call().then(function(value) {

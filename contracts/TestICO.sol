@@ -1,5 +1,5 @@
-import "./GiantICO.sol";
+import "./ICO.sol";
 
-contract TestICO is GiantICO {
+contract TestICO is ICO {
     
 }

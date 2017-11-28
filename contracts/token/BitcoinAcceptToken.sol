@@ -15,9 +15,8 @@ contract BitcoinAcceptToken is MintableToken, Multiownable, Console {
     // Bitcoin addresses where income will be send
     mapping(address => bytes) bitcoinAdresses;
 
-    uint256 satoshitousd = 12500;
+    uint256 public satoshitousd = 12500;
 
-    /*
     modifier notProccessed(bytes txId) {
         if (isTxProccessed(txId)) throw;
         _;
@@ -27,32 +26,19 @@ contract BitcoinAcceptToken is MintableToken, Multiownable, Console {
         if (msg.sender != trustedRelay) throw;
         _;
     }
-    */
 
-    function isTxProccessed(bytes txId) constant returns (bool) {
+    function isTxProccessed(bytes txId) public constant returns (bool) {
         return (bitcoinTxs[txId] == true);
-    }
-
-    function isTrustedRelay() returns (bool) {
-        return (msg.sender == trustedRelay);        
     }
 
     function setTrustedRelay(address _relay) public onlyMainOwner returns (bool) {
         trustedRelay = _relay;
         return true;
     }
-
-    //isTrustedRelay notProccessed(txId) 
-    function proccessBitcoin(bytes txId, uint256 value, bytes btcaddress, address _etherAddress) public {
-        require(isTrustedRelay());
-        require(!isTxProccessed(txId));
-
-        LogBytes("Inited");
-        
+   
+    function proccessBitcoin(bytes txId, uint256 value, bytes btcaddress, address _etherAddress) public isTrustedRelay notProccessed(txId) {        
         bitcoinTxs[txId] = true;
         uint tokens = value.div(satoshitousd);
-
-        LogBytes("Divided");
 
         balances[this] = balances[this].sub(tokens);
 

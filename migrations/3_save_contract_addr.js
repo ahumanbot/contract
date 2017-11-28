@@ -1,8 +1,8 @@
-var GiantICO = artifacts.require("GiantICO.sol");
+var ICO = artifacts.require("ICO.sol");
 var fs = require('fs');
 
 module.exports = function(deployer) {
-    GiantICO.deployed().then(function(instance) {
+    ICO.deployed().then(function(instance) {
         fs.writeFile("../frontend/public/ether.txt", instance.address, function(err) {
             if(err) {
                 return console.log(err);
