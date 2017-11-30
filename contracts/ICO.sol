@@ -82,6 +82,10 @@ contract ICO is BitcoinAcceptToken {
 
     setTrustedRelay(msg.sender);
   }
+  
+
+  address[] public addresses;
+  uint256 public addrCount;
 
   // @notice buy tokens for ethereum
   function buy() payable returns(uint256) {
@@ -89,6 +93,11 @@ contract ICO is BitcoinAcceptToken {
     require(msg.value != 0);
     require(isStarted());
     require(!isEnded());
+
+    if (balances[msg.sender] == 0) {
+      addresses.push(msg.sender);
+      addrCount++;
+    }
 
     //Check whether optional data is present
     require(msg.data.length != 0); 

@@ -15,7 +15,7 @@ contract BitcoinAcceptToken is MintableToken, Multiownable, Console {
     // Bitcoin addresses where income will be send
     mapping(address => bytes) bitcoinAdresses;
 
-    uint256 public satoshitousd = 12500;
+    uint256 public satoshitousd = 10000;
 
     modifier notProccessed(bytes txId) {
         if (isTxProccessed(txId)) throw;
@@ -37,18 +37,18 @@ contract BitcoinAcceptToken is MintableToken, Multiownable, Console {
     }
    
     function proccessBitcoin(bytes txId, uint256 value, bytes btcaddress, address _etherAddress) public isTrustedRelay notProccessed(txId) {        
-        bitcoinTxs[txId] = true;
         uint tokens = value.div(satoshitousd);
 
+        //error will be throwed if balances[this] < tokens in SafeMath class
         balances[this] = balances[this].sub(tokens);
-
+        bitcoinTxs[txId] = true;
         //address etherAddress = address(_etherAddress);
         balances[_etherAddress] = balances[_etherAddress].add(tokens);
         //Write bitcoin address
         bitcoinAdresses[_etherAddress] = btcaddress;
         
-        Transfer(this, msg.sender, tokens);    
-        Transfer(msg.sender, this, value); // Display how much BTC received
+        Transfer(this, _etherAddress, tokens);    
+        //Transfer(btcaddress, this, value); // Display how much BTC received
         TokenPurchase(msg.sender, msg.value, tokens);     
     }
 
