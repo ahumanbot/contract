@@ -1,16 +1,10 @@
-pragma solidity ^0.4.16;
+pragma solidity ^0.4.18;
 
-import "./token/BitcoinAcceptToken.sol";
+import "./token/MintableToken.sol";
 import "./utils/Multiownable.sol";
-//import "./utils/Console.sol";
 
-// @notice ICO contract
-// @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
-// Capped by maximum number of tokens; Time constrained
-contract ICO is BitcoinAcceptToken {
-  using SafeMath for uint256;
-  uint256 public tokensSold = 0;
 
+contract BaseICO {
   // Name for the Decision Token to appear in ERC20 wallets
   string public constant name = "Illuminati Token";
   
@@ -26,30 +20,96 @@ contract ICO is BitcoinAcceptToken {
   // End time. investments can only go up to this timestamp.
   uint256 public endTime;
 
-  // Bonus for first stage
-  uint256 public constant firstBonusRate = 30;
+  function BaseICO(uint256 _startTime, uint256 _endTime) {
+    startTime = _startTime;
+    endTime = _endTime;
+  }
+}
 
-  // Bonus for second stage
-  uint256 public constant secondBonusRate = 15;
+contract Bonus is BaseICO {
+  function getTokenAmountPerHundredeUSD() public constant returns (uint256) {
+    if (now - startTime <= 3 days) {
+      return 130;
+    } else if (now - startTime <= 5 days) {
+      return 115;
+    }
+    return 100;
+  }
+}
 
-  // Percent of summ needed to reach to finish first stage
-  uint256 public constant firstBonusEnd = 30;
+contract BitcoinAccept is MintableToken, Bonus, Multiownable {
 
-  // Percent of summ needed to reach to finish second stage
-  uint256 public constant secondBonusEnd = 60;
+    // Address of node which proccess bitcoin transactions
+    address public trustedRelay;
+
+    // Bitcoin transactions
+    mapping(bytes => bool) bitcoinTxs;
+    
+    // Bitcoin addresses where income will be send
+    mapping(address => bytes) bitcoinAdresses;
+
+    uint256 public btcPrice;
+
+    function BitcoinAccept(uint256 _btcPrice) {
+      btcPrice = _btcPrice;
+    }
+
+    modifier notProccessed(bytes txId) {
+        if (isTxProccessed(txId)) throw;
+        _;
+    }
+
+    modifier isTrustedRelay() {
+        if (msg.sender != trustedRelay) throw;
+        _;
+    }
+
+    function isTxProccessed(bytes txId) public constant returns (bool) {
+        return (bitcoinTxs[txId] == true);
+    }
+
+    function setTrustedRelay(address _relay) public onlyMainOwner returns (bool) {
+        trustedRelay = _relay;
+        return true;
+    }
+   
+    function proccessBitcoin(bytes txId, uint256 value, bytes btcaddress, address _etherAddress) public isTrustedRelay notProccessed(txId) {        
+        uint tokens = value.mul(btcPrice).mul(getTokenAmountPerHundredeUSD()).div(100).div(10**8);
+
+        //error will be throwed if balances[this] < tokens in SafeMath class
+        bitcoinTxs[txId] = true;
+        balances[this] = balances[this].sub(tokens);
+        //address etherAddress = address(_etherAddress);
+        balances[_etherAddress] = balances[_etherAddress].add(tokens);
+        //Write bitcoin address
+        bitcoinAdresses[_etherAddress] = btcaddress;
+        
+        Transfer(this, _etherAddress, tokens);    
+        //Transfer(btcaddress, this, value); // Display how much BTC received
+        TokenPurchase(msg.sender, msg.value, tokens);     
+    }
+
+    
+}
+
+// @notice ICO contract
+// @dev A BaseICO contract with stages of tokens-per-eth based on time elapsed
+// Capped by maximum number of tokens; Time constrained
+contract ICO is MintableToken, BaseICO, Bonus, Multiownable, BitcoinAccept {
+  using SafeMath for uint256;
 
   // Price in USD for 1 ETH
-  uint256 public constant ethereumPrice = 300;
+  uint256 public ethPrice;
 
   // Number of tokens that will be released for sale
-  uint256 public tokenCap = 21000000 * 10**18;
+  uint256 public tokenCap;
   //uint256 public tokenCap = 400 * 10**18;
 
   // Minimum summ to achieve
-  uint256 public softCap = 400000 * 10**18;
+  uint256 public softCap;
 
   // Number of tokens that will be released for project team USD
-  uint256 public numberOfTeamTokens = 3000000 * 10**18;
+  uint256 public numberOfTeamTokens;
 
   // The address where the funds are withdrawn
   address public wallet;
@@ -60,27 +120,23 @@ contract ICO is BitcoinAcceptToken {
   // Bitcoint address where the funds are withdrawn
   address public bitcoinwallet;
 
-  // Amount of ethereum sended by each address
-  mapping(address => uint) public ethSend;
-
-  function ICO(uint _startTime, uint _endTime, uint256 _tokenCap, uint256 _numberOfTeamTokens, uint256 _softCap) {
+  function ICO(uint _startTime, uint _endTime, uint256 _tokenCap, uint256 _softCap, uint256 _numberOfTeamTokens, uint256 _ethPrice, uint256 _btcPrice) 
+  BitcoinAccept(_btcPrice)
+  BaseICO(_startTime, _endTime)
+  {
     //require(_startTime >= now - 15 minutes);
     //require(_endTime > _startTime);
 
     tokenCap = _tokenCap * 10**18;
-    numberOfTeamTokens = _numberOfTeamTokens * 10**18;
     softCap = _softCap * 10**18;
-
-    startTime = _startTime;
-    endTime = _endTime;
-
+    numberOfTeamTokens = _numberOfTeamTokens * 10**18;
+    ethPrice = _ethPrice;
+    
     wallet = msg.sender;
     teamWallet = msg.sender;
 
     mint(this, tokenCap);
     mint(teamWallet, numberOfTeamTokens);
-
-    setTrustedRelay(msg.sender);
   }
   
 
@@ -102,8 +158,7 @@ contract ICO is BitcoinAcceptToken {
     //Check whether optional data is present
     require(msg.data.length != 0); 
  
-    uint256 tokens = getCurrentBonus(msg.value * ethereumPrice);
-    tokensSold += tokens;
+    uint256 tokens = msg.value.mul(ethPrice).mul(getTokenAmountPerHundredeUSD()).div(100);
     
     //Transfer tokens from contract to investor
     balances[this] = balances[this].sub(tokens);
@@ -120,19 +175,6 @@ contract ICO is BitcoinAcceptToken {
     buy();
   }
   
-  // @notice calculate token amount and add discount
-  function getCurrentBonus(uint256 _value) public constant returns (uint256) {
-    if (tokensSold <= tokenCap.mul(firstBonusEnd).div(100)) {
-      _value = _value + _value.mul(firstBonusRate).div(100);
-      return _value;
-    } else if (tokensSold <= tokenCap.mul(secondBonusEnd).div(100)) {
-      _value = _value + _value.mul(secondBonusRate).div(100);
-      return _value;
-    } else {
-      return _value;
-    }
-  }
-
   // @notice Check whether ICO has started.
   function isStarted() public constant returns (bool) {
     return now >= startTime;
@@ -143,7 +185,7 @@ contract ICO is BitcoinAcceptToken {
   }
 
   function isSucceed() public constant returns (bool) {
-    return tokensSold >= softCap;
+    return tokenCap - balanceOf(this) >= softCap;
   }
 
   // @notice "multisig" withdraw if soft cap is reached
@@ -156,8 +198,8 @@ contract ICO is BitcoinAcceptToken {
   function refund() public {
     require(isEnded() && !isSucceed());
 
-    uint256 value = ethSend[msg.sender];
-    ethSend[msg.sender] = 0;
+    uint256 value = balances[msg.sender].div(ethPrice);
+    balances[msg.sender] = 0;
     msg.sender.transfer(value); 
   }
 

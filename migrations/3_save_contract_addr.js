@@ -3,10 +3,12 @@ var fs = require('fs');
 
 module.exports = function(deployer) {
     ICO.deployed().then(function(instance) {
+        /*
         fs.writeFile("../frontend/public/ether.txt", instance.address, function(err) {
             if(err) {
                 return console.log(err);
             }
         }); 
+        */
     })
 };

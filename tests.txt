@@ -1,0 +1,14 @@
+Should check number of team tokens
+Should check that ICO is started
+Should check that ICO is not succeed
+Should check that ICO is not ended
+Sending 0.33 ether
+Investor should have 128 tokens
+Should set trusted relay and check is it set and return true
+Should send btc, check after time number of tokens
+Should check that ico is not ended
+Should check that ICO is not failed
+Sending 0.33 * 1000 ether
+Sending 0.33 * 1000 ether
+Should check that ICO is succeed
+Should check is it trusted relay and return false

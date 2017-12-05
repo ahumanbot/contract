@@ -91,7 +91,7 @@ contract('General tests', function(accounts) {
 
   
   util.itlog("Should set trusted relay and check is it set and return true", function(done) {
-    instance.setTrustedRelay(accounts[0]).then(function() {
+    instance.setTrustedRelay.sendTransaction(accounts[0]).then(function() {
       instance.trustedRelay({from: accounts[0]}).then(function(trustedRelay) {
         assert.equal(trustedRelay, accounts[0], "Relay should be trusted");
         done();
@@ -100,7 +100,7 @@ contract('General tests', function(accounts) {
   })
 
   util.itlog("Should send btc, check after time number of tokens", function(done) {    
-    var amountToBuy = 10 * Math.round(1 / 8000 * Math.pow(10, 8));
+    var amountToBuy = 10 * Math.round(1 / 10000 * Math.pow(10, 8));
 
     client.cmd('sendfrom', "1", "mtWfgtZwC3WvpobfufTATm2oFcQDmi8JY5", amountToBuy / Math.pow(10, 8), function (err, txid) {
       assert.equal(err, null, "Bitcoin tx not is send");
