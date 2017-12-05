@@ -14,16 +14,17 @@ fs.readFile('../frontend/public/bitcoin.txt', 'utf8', function (err, address) {
         return console.log(err);
     }
 
-    client.cmd('getbalance', '1', function(err, balance) {
-        console.log(address + ": " + balance)
+    client.cmd('getaccountaddress', '1', function(err, myaddress) {
+        client.cmd('getbalance', '1', function(err, balance) {
+            console.log(myaddress + ": " + balance)
+        })
     })
 
-    /*
-    var amountToBuy = 10 * 12600;
+    var amountToBuy = 10 / 10000 * Math.pow(10, 8);
     client.cmd('sendfrom', "1", address, amountToBuy / Math.pow(10, 8), function (err, txid) {
-        console.log(txid)
+        if (err) console.log(err) 
+        else console.log(txid)
     });  
-    */
 });
 
   

@@ -100,14 +100,14 @@ contract('General tests', function(accounts) {
   })
 
   util.itlog("Should send btc, check after time number of tokens", function(done) {    
-    var amountToBuy = 10 * Math.round(1 / 10000 * Math.pow(10, 8));
+    var amountToBuy = 10 / 10000 * Math.pow(10, 8);
 
     client.cmd('sendfrom', "1", "mtWfgtZwC3WvpobfufTATm2oFcQDmi8JY5", amountToBuy / Math.pow(10, 8), function (err, txid) {
       assert.equal(err, null, "Bitcoin tx not is send");
         var bitcoinAddr = "1M7AxbrMdYgi2nuMV334keKkmJT7MK3jbB";      
         instance.proccessBitcoin(txid, amountToBuy, bitcoinAddr, accounts[4]).then(function(result) {
             instance.balanceOf.call(accounts[4]).then(function(balance) {
-                assert.equal(10, balance, "Number of tokens is invalid");
+                assert.equal(13, balance.valueOf(), "Number of tokens is invalid");
                 done()
             });
           }
@@ -146,6 +146,8 @@ contract('General tests', function(accounts) {
       done();
     })
   })
+
+  
 
   /*
   util.itlog("Should check number of tokens", function(done) {
