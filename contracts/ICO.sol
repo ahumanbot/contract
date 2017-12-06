@@ -3,8 +3,7 @@ pragma solidity ^0.4.18;
 import "./token/MintableToken.sol";
 import "./utils/Multiownable.sol";
 
-
-contract BaseICO {
+contract BaseICO is MintableToken {
   // Name for the Decision Token to appear in ERC20 wallets
   string public constant name = "Illuminati Token";
   
@@ -23,79 +22,11 @@ contract BaseICO {
   function BaseICO(uint256 _startTime, uint256 _endTime) {
     startTime = _startTime;
     endTime = _endTime;
-  }
+  } 
 }
 
-contract Bonus is BaseICO {
-  function getTokenAmountPerHundredeUSD() public constant returns (uint256) {
-    if (now - startTime <= 3 days) {
-      return 130;
-    } else if (now - startTime <= 5 days) {
-      return 115;
-    }
-    return 100;
-  }
-}
-
-contract BitcoinAccept is MintableToken, Bonus, Multiownable {
-
-    // Address of node which proccess bitcoin transactions
-    address public trustedRelay;
-
-    // Bitcoin transactions
-    mapping(bytes => bool) bitcoinTxs;
-    
-    // Bitcoin addresses where income will be send
-    mapping(address => bytes) bitcoinAdresses;
-
-    uint256 public btcPrice;
-
-    function BitcoinAccept(uint256 _btcPrice) {
-      btcPrice = _btcPrice;
-    }
-
-    modifier notProccessed(bytes txId) {
-        if (isTxProccessed(txId)) throw;
-        _;
-    }
-
-    modifier isTrustedRelay() {
-        if (msg.sender != trustedRelay) throw;
-        _;
-    }
-
-    function isTxProccessed(bytes txId) public constant returns (bool) {
-        return (bitcoinTxs[txId] == true);
-    }
-
-    function setTrustedRelay(address _relay) public onlyMainOwner returns (bool) {
-        trustedRelay = _relay;
-        return true;
-    }
-   
-    function proccessBitcoin(bytes txId, uint256 value, bytes btcaddress, address _etherAddress) public isTrustedRelay notProccessed(txId) {        
-        uint tokens = value.mul(btcPrice).mul(getTokenAmountPerHundredeUSD()).div(100).div(10**8);
-
-        //error will be throwed if balances[this] < tokens in SafeMath class
-        bitcoinTxs[txId] = true;
-        balances[this] = balances[this].sub(tokens);
-        //address etherAddress = address(_etherAddress);
-        balances[_etherAddress] = balances[_etherAddress].add(tokens);
-        //Write bitcoin address
-        bitcoinAdresses[_etherAddress] = btcaddress;
-        
-        Transfer(this, _etherAddress, tokens);    
-        //Transfer(btcaddress, this, value); // Display how much BTC received
-        TokenPurchase(msg.sender, msg.value, tokens);     
-    }
-
-    
-}
-
-// @notice ICO contract
-// @dev A BaseICO contract with stages of tokens-per-eth based on time elapsed
-// Capped by maximum number of tokens; Time constrained
-contract ICO is MintableToken, BaseICO, Bonus, Multiownable, BitcoinAccept {
+// ICO accepting eth with refund
+contract EthICO is MintableToken, BaseICO, Multiownable {
   using SafeMath for uint256;
 
   // Price in USD for 1 ETH
@@ -120,8 +51,18 @@ contract ICO is MintableToken, BaseICO, Bonus, Multiownable, BitcoinAccept {
   // Bitcoint address where the funds are withdrawn
   address public bitcoinwallet;
 
-  function ICO(uint _startTime, uint _endTime, uint256 _tokenCap, uint256 _softCap, uint256 _numberOfTeamTokens, uint256 _ethPrice, uint256 _btcPrice) 
-  BitcoinAccept(_btcPrice)
+  //List of addresses for future balance iterating
+  address[] public addresses;
+
+  // Bitcoin addresses where income will be send
+  mapping(address => bytes) bitcoinAdresses;
+
+  function addressesSize() public returns (uint) {
+    return addresses.length;
+  }
+
+  function EthICO(uint256 _startTime, uint256 _endTime, 
+    uint256 _tokenCap, uint256 _softCap, uint256 _numberOfTeamTokens, uint256 _ethPrice) 
   BaseICO(_startTime, _endTime)
   {
     //require(_startTime >= now - 15 minutes);
@@ -137,11 +78,7 @@ contract ICO is MintableToken, BaseICO, Bonus, Multiownable, BitcoinAccept {
 
     mint(this, tokenCap);
     mint(teamWallet, numberOfTeamTokens);
-  }
-  
-
-  address[] public addresses;
-  uint256 public addrCount;
+  }  
 
   // @notice buy tokens for ethereum
   function buy() payable returns(uint256) {
@@ -149,43 +86,41 @@ contract ICO is MintableToken, BaseICO, Bonus, Multiownable, BitcoinAccept {
     require(msg.value != 0);
     require(isStarted());
     require(!isEnded());
+    require(msg.data.length != 0);
 
-    if (balances[msg.sender] == 0) {
-      addresses.push(msg.sender);
-      addrCount++;
-    }
-
-    //Check whether optional data is present
-    require(msg.data.length != 0); 
- 
-    uint256 tokens = msg.value.mul(ethPrice).mul(getTokenAmountPerHundredeUSD()).div(100);
-    
-    //Transfer tokens from contract to investor
-    balances[this] = balances[this].sub(tokens);
-    balances[msg.sender] = balances[msg.sender].add(tokens);
-    //Write bitcoin address
-    bitcoinAdresses[msg.sender] = msg.data;
-    
-    Transfer(this, msg.sender, tokens);    
-    TokenPurchase(msg.sender, msg.value, tokens);
+    _buy(msg.sender, msg.data, msg.value.mul(ethPrice));
+    //Check whether optional data is present     
   }
 
   // @notice fallback function
   function () payable {
     buy();
   }
-  
-  // @notice Check whether ICO has started.
-  function isStarted() public constant returns (bool) {
-    return now >= startTime;
+
+  function _buy(address eth, bytes btc, uint256 value) internal {
+    if (balances[eth] == 0) {
+      addresses.push(eth);
+    }
+
+    uint256 tokens = value.mul(getTokenAmountPerHundredeUSD()).div(100);
+    
+    //Transfer tokens from contract to investor
+    balances[this] = balances[this].sub(tokens);
+    balances[eth] = balances[eth].add(tokens);
+    //Write bitcoin address
+    bitcoinAdresses[eth] = btc;
+    
+    Transfer(this, eth, tokens);    
+    TokenPurchase(eth, value, tokens);
   }
 
-  function isEnded() public constant returns (bool) {
-    return now > endTime;
-  }
-
-  function isSucceed() public constant returns (bool) {
-    return tokenCap - balanceOf(this) >= softCap;
+  function getTokenAmountPerHundredeUSD() public constant returns (uint256) {
+    if (now - startTime <= 3 days) {
+      return 130;
+    } else if (now - startTime <= 5 days) {
+      return 115;
+    }
+    return 100;
   }
 
   // @notice "multisig" withdraw if soft cap is reached
@@ -203,4 +138,66 @@ contract ICO is MintableToken, BaseICO, Bonus, Multiownable, BitcoinAccept {
     msg.sender.transfer(value); 
   }
 
+  // @notice Check whether ICO has started.
+  function isStarted() public constant returns (bool) {
+    return now >= startTime;
+  }
+
+  function isEnded() public constant returns (bool) {
+    return now > endTime;
+  }
+
+  function isSucceed() public constant returns (bool) {
+    return tokenCap - balanceOf(this) >= softCap;
+  }
 }
+
+// Extension for EthICO allowing to accept bitcoins 
+contract ICO is Multiownable, EthICO {
+
+    // Address of node which proccess bitcoin transactions
+    address public trustedRelay;
+
+    // Bitcoin transactions
+    mapping(bytes => bool) bitcoinTxs;
+
+    uint256 public btcPrice;
+
+    function ICO(uint _startTime, uint _endTime, 
+      uint256 _tokenCap, uint256 _softCap, uint256 _numberOfTeamTokens, uint256 _ethPrice, 
+      uint256 _btcPrice) 
+    EthICO(_startTime, _endTime, _tokenCap, _softCap, _numberOfTeamTokens, _ethPrice) 
+    {
+      btcPrice = _btcPrice;
+    }
+
+    modifier notProccessed(bytes txId) {
+        if (isTxProccessed(txId)) throw;
+        _;
+    }
+
+    modifier isTrustedRelay() {
+        if (msg.sender != trustedRelay) throw;
+        _;
+    }
+
+    function isTxProccessed(bytes txId) public constant returns (bool) {
+        return (bitcoinTxs[txId] == true);
+    }
+
+    function setTrustedRelay(address _relay) public onlyMainOwner returns (bool) {
+        trustedRelay = _relay;
+        return true;
+    }
+   
+    function proccessBitcoin(bytes txId, uint256 value, bytes _btcAddr, address _etherAddr) public isTrustedRelay notProccessed(txId) {   
+      require(_etherAddr != 0x0);
+      require(value != 0);
+      require(isStarted());
+      require(!isEnded());
+
+      bitcoinTxs[txId] = true;
+      _buy(_etherAddr, _btcAddr, value.mul(btcPrice).div(10**8)); 
+    }    
+}
+
