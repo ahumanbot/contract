@@ -12,7 +12,8 @@ Should check that ICO is not failed
 Sending 0.33 * 1000 ether
 Sending 0.33 * 1000 ether
 Should check that ICO is succeed
-Should check is it trusted relay and return false
 Should try to refund funds but fail
 Should check contracts balances
 Try to deposit on btcVault from not allowed address
+Test multiownable withdraw call
+Should check contracts balances

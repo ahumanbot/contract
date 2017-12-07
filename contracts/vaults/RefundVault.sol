@@ -28,13 +28,9 @@ contract RefundVault is Multiownable {
     deposited[investor] = deposited[investor].add(msg.value);
   }
 
-  function close() onlyMainOwner public {
+  function close() onlyAnyOwner public {
     Closed();
     wallet.transfer(this.balance);
-  }
-
-  function enableRefunds() onlyMainOwner public {
-    RefundsEnabled();
   }
 
   function refund(address investor) public {

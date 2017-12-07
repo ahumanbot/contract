@@ -187,12 +187,6 @@ contract('General tests', function(accounts) {
     })      
   })
 
-  util.itlog("Should check is it trusted relay and return false", function(done) {
-    instance.withdraw({from: accounts[0]}).then(function() {
-      done();
-    })
-  })
-
   util.itlog("Should try to refund funds but fail", function(done) {
     instance.isRefundable.call().then(function(value) {
       assert.equal(value, false, "Should not be refundable");
@@ -201,16 +195,18 @@ contract('General tests', function(accounts) {
   })
   
   util.itlog("Should check contracts balances", function(done) {
-    EthVault.deployed().then(function(ethVault) {
-      instance.getBalance.call(ethVault.address).then(function(balance) {
-        assert.equal(balance.valueOf(), web3.utils.toWei("0.99", "ether"))
+    instance.getBalance.call(EthVault.address).then(function(balance) {
+      assert.equal(balance.valueOf(), web3.utils.toWei("0.99", "ether"))
+
+      instance.getBalance.call(BTCVault.address).then(function(balance) {
+        assert.equal(balance.valueOf(), 0)
         
         instance.getBalance.call(instance.address).then(function(balance) {
           assert.equal(balance.valueOf(), 0, "Balance of ico contract should be 0")   
           done()   
         }) 
-      })   
-    })
+      })        
+    })   
   })
 
   util.itlog("Try to deposit on btcVault from not allowed address", function(done) {
@@ -222,6 +218,35 @@ contract('General tests', function(accounts) {
         done();
       })
     })
+  })
+
+  util.itlog("Test multiownable withdraw call", function(done) {
+    instance.transferOwnership([accounts[0], accounts[1]]).then(function(tx) {
+      assert.isOk(tx.receipt)
+      instance.withdraw().then(function(tx) {
+        instance.getBalance.call(EthVault.address).then(function(balance) {
+          assert.notEqual(balance.valueOf(), 0)
+          instance.withdraw({from: accounts[1]}).then(function(tx) {
+            done()
+          })
+        });        
+      })
+    })
+  })
+  
+  util.itlog("Should check contracts balances", function(done) {
+    instance.getBalance.call(EthVault.address).then(function(balance) {
+      assert.equal(balance.valueOf(), 0)
+
+      instance.getBalance.call(BTCVault.address).then(function(balance) {
+        assert.equal(balance.valueOf(), 0)
+        
+        instance.getBalance.call(instance.address).then(function(balance) {
+          assert.equal(balance.valueOf(), 0, "Balance of ico contract should be 0")   
+          done()   
+        }) 
+      })        
+    })   
   })
 })
 

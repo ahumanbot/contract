@@ -1,8 +1,9 @@
 pragma solidity ^0.4.18;
 
 import "./RefundVault.sol";
+import '../utils/Multiownable.sol';
 
-contract BTCVault is RefundVault {
+contract BTCVault is Multiownable, RefundVault {
   function BTCVault(address _wallet) public 
   RefundVault(_wallet)
   {

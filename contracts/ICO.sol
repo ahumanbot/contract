@@ -136,7 +136,8 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
   // @notice "multisig" withdraw if soft cap is reached
   function withdraw() payable onlyManyOwners {
     require(isSucceed());
-    wallet.transfer(msg.value);
+    
+    ethVault.close();
   }
 
   // @notice refund on ico ended and soft cap not reached
@@ -144,6 +145,7 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
     require(isEnded() && !isSucceed());
 
     ethVault.refund(msg.sender);
+    btcVault.refund(msg.sender);
   }
 
   // @notice Check whether ICO has started.
@@ -211,6 +213,14 @@ contract ICO is Multiownable, EthICO {
       _buy(_etherAddr, _btcAddr, usd); 
       btcVault.deposit(_etherAddr, usd.mul(10**18).div(ethPrice));
     }    
+
+    // @notice "multisig" withdraw if soft cap is reached
+    function withdraw() payable onlyManyOwners {
+      require(isSucceed());
+      
+      ethVault.close();
+      btcVault.close();
+    }
 
 
     /** DEV METHODS FOR TEST PURPOSE */
