@@ -54,8 +54,11 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
   //List of addresses for future balance iterating
   address[] public addresses;
 
+  //Eth send by each account
+  mapping(address => uint256) public ethSend;
+
   // Bitcoin addresses where income will be send
-  mapping(address => bytes) bitcoinAdresses;
+  mapping(address => bytes) public bitcoinAdresses;
 
   function addressesSize() public returns (uint) {
     return addresses.length;
@@ -81,7 +84,7 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
   }  
 
   // @notice buy tokens for ethereum
-  function buy() payable returns(uint256) {
+  function buy() payable {
     require(msg.sender != 0x0);
     require(msg.value != 0);
     require(isStarted());
@@ -109,6 +112,8 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
     balances[eth] = balances[eth].add(tokens);
     //Write bitcoin address
     bitcoinAdresses[eth] = btc;
+
+    ethSend[eth] = value.div(ethPrice);
     
     Transfer(this, eth, tokens);    
     TokenPurchase(eth, value, tokens);
@@ -133,8 +138,11 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
   function refund() public {
     require(isEnded() && !isSucceed());
 
-    uint256 value = balances[msg.sender].div(ethPrice);
-    balances[msg.sender] = 0;
+    //uint256 value = balances[msg.sender].div(ethPrice);
+    //balances[msg.sender] = 0;
+
+    uint256 value = ethSend[msg.sender];
+    ethSend[msg.sender] = 0;
     msg.sender.transfer(value); 
   }
 
@@ -199,5 +207,12 @@ contract ICO is Multiownable, EthICO {
       bitcoinTxs[txId] = true;
       _buy(_etherAddr, _btcAddr, value.mul(btcPrice).div(10**8)); 
     }    
+
+
+    /** DEV METHODS FOR TEST PURPOSE */
+
+    function isRefundable() public constant returns(bool) {
+      return isEnded() && !isSucceed();
+    }
 }
 

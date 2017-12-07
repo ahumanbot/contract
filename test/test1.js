@@ -182,6 +182,12 @@ contract('General tests', function(accounts) {
     })
   })
 
-  
+  util.itlog("Should try to refund funds but fail", function(done) {
+    instance.isRefundable.call().then(function(value) {
+      assert.equal(value, false, "Should not be refundable");
+      done();
+    })
+  })
+    
 })
 
