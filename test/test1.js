@@ -212,5 +212,16 @@ contract('General tests', function(accounts) {
       })   
     })
   })
+
+  util.itlog("Try to deposit on btcVault from not allowed address", function(done) {
+    BTCVault.deployed().then(function(btcVault) {
+      btcVault.deposit(accounts[9], web3.utils.toWei("0.99", "ether")).then(function(tx) {
+        assert.isOk(false, "Should fail.");
+        done();
+      }, function(error) {
+        done();
+      })
+    })
+  })
 })
 

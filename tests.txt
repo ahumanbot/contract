@@ -15,3 +15,4 @@ Should check that ICO is succeed
 Should check is it trusted relay and return false
 Should try to refund funds but fail
 Should check contracts balances
+Try to deposit on btcVault from not allowed address

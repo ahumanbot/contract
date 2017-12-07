@@ -19,13 +19,13 @@ module.exports = function(deployer, network, accounts) {
       ).then(function() {
         EthVault.deployed().then(function(eth) {
           ICO.deployed().then(function(ico) {
-            eth.transferOwnership([ico.address, accounts[0]]);
+            eth.transferOwnership([ico.address]);
           })          
         })
 
         BTCVault.deployed().then(function(btc) {
           ICO.deployed().then(function(ico) {
-            btc.transferOwnership([ico.address, accounts[0]]);
+            btc.transferOwnership([ico.address]);
           })          
         })
       });
