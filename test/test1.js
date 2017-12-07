@@ -6,6 +6,8 @@ Web3.providers.HttpProvider.prototype.sendAsync = Web3.providers.HttpProvider.pr
 let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 var bitcoin = require('bitcoin');
 let ICO = artifacts.require("./ICO.sol")
+let EthVault = artifacts.require("./vaults/EthVault.sol")
+let BTCVault = artifacts.require("./vaults/BTCVault.sol")
 let util = require('./util.js');
 
 contract('General tests', function(accounts) {
@@ -115,6 +117,15 @@ contract('General tests', function(accounts) {
     });    
   })
 
+  util.itlog("Should check balance on btcVault", function(done) {
+    BTCVault.deployed().then(function(btcVault) {
+      btcVault.deposited(accounts[4]).then(function(balance) {
+        assert.equal(balance.valueOf(), 10 / 300 * Math.pow(10, 18))
+        done();
+      })
+    })
+  })
+
   util.itlog("Should check that ico is not ended", function(done) {
     instance.isEnded.call().then(function(value) {
       assert.equal(value, false, "ICO is ended but should not");
@@ -188,6 +199,18 @@ contract('General tests', function(accounts) {
       done();
     })
   })
-    
+  
+  util.itlog("Should check contracts balances", function(done) {
+    EthVault.deployed().then(function(ethVault) {
+      instance.getBalance.call(ethVault.address).then(function(balance) {
+        assert.equal(balance.valueOf(), web3.utils.toWei("0.99", "ether"))
+        
+        instance.getBalance.call(instance.address).then(function(balance) {
+          assert.equal(balance.valueOf(), 0, "Balance of ico contract should be 0")   
+          done()   
+        }) 
+      })   
+    })
+  })
 })
 

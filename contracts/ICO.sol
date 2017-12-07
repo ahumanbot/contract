@@ -2,6 +2,8 @@ pragma solidity ^0.4.18;
 
 import "./token/MintableToken.sol";
 import "./utils/Multiownable.sol";
+import "./vaults/EthVault.sol";
+import "./vaults/BTCVault.sol";
 
 contract BaseICO is MintableToken {
   // Name for the Decision Token to appear in ERC20 wallets
@@ -54,18 +56,20 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
   //List of addresses for future balance iterating
   address[] public addresses;
 
-  //Eth send by each account
-  mapping(address => uint256) public ethSend;
-
   // Bitcoin addresses where income will be send
   mapping(address => bytes) public bitcoinAdresses;
+
+  EthVault public ethVault;
+  
+  BTCVault public btcVault;
 
   function addressesSize() public returns (uint) {
     return addresses.length;
   }
 
   function EthICO(uint256 _startTime, uint256 _endTime, 
-    uint256 _tokenCap, uint256 _softCap, uint256 _numberOfTeamTokens, uint256 _ethPrice) 
+    uint256 _tokenCap, uint256 _softCap, uint256 _numberOfTeamTokens, uint256 _ethPrice,
+    address _ethVault) 
   BaseICO(_startTime, _endTime)
   {
     //require(_startTime >= now - 15 minutes);
@@ -79,6 +83,8 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
     wallet = msg.sender;
     teamWallet = msg.sender;
 
+    ethVault = EthVault(_ethVault);
+
     mint(this, tokenCap);
     mint(teamWallet, numberOfTeamTokens);
   }  
@@ -91,8 +97,9 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
     require(!isEnded());
     require(msg.data.length != 0);
 
+
     _buy(msg.sender, msg.data, msg.value.mul(ethPrice));
-    //Check whether optional data is present     
+    ethVault.deposit.value(msg.value)(msg.sender);  
   }
 
   // @notice fallback function
@@ -112,8 +119,6 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
     balances[eth] = balances[eth].add(tokens);
     //Write bitcoin address
     bitcoinAdresses[eth] = btc;
-
-    ethSend[eth] = value.div(ethPrice);
     
     Transfer(this, eth, tokens);    
     TokenPurchase(eth, value, tokens);
@@ -138,12 +143,7 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
   function refund() public {
     require(isEnded() && !isSucceed());
 
-    //uint256 value = balances[msg.sender].div(ethPrice);
-    //balances[msg.sender] = 0;
-
-    uint256 value = ethSend[msg.sender];
-    ethSend[msg.sender] = 0;
-    msg.sender.transfer(value); 
+    ethVault.refund(msg.sender);
   }
 
   // @notice Check whether ICO has started.
@@ -162,7 +162,6 @@ contract EthICO is MintableToken, BaseICO, Multiownable {
 
 // Extension for EthICO allowing to accept bitcoins 
 contract ICO is Multiownable, EthICO {
-
     // Address of node which proccess bitcoin transactions
     address public trustedRelay;
 
@@ -171,12 +170,15 @@ contract ICO is Multiownable, EthICO {
 
     uint256 public btcPrice;
 
+    BTCVault public btcVault;
+
     function ICO(uint _startTime, uint _endTime, 
-      uint256 _tokenCap, uint256 _softCap, uint256 _numberOfTeamTokens, uint256 _ethPrice, 
-      uint256 _btcPrice) 
-    EthICO(_startTime, _endTime, _tokenCap, _softCap, _numberOfTeamTokens, _ethPrice) 
+      uint256 _tokenCap, uint256 _softCap, uint256 _numberOfTeamTokens, uint256 _ethPrice, uint256 _btcPrice,
+      address _ethVault, address _btcVault) 
+    EthICO(_startTime, _endTime, _tokenCap, _softCap, _numberOfTeamTokens, _ethPrice, _ethVault) 
     {
       btcPrice = _btcPrice;
+      btcVault = BTCVault(_btcVault);
     }
 
     modifier notProccessed(bytes txId) {
@@ -205,7 +207,9 @@ contract ICO is Multiownable, EthICO {
       require(!isEnded());
 
       bitcoinTxs[txId] = true;
-      _buy(_etherAddr, _btcAddr, value.mul(btcPrice).div(10**8)); 
+      uint256 usd = value.mul(btcPrice).div(10**8);
+      _buy(_etherAddr, _btcAddr, usd); 
+      btcVault.deposit(_etherAddr, usd.mul(10**18).div(ethPrice));
     }    
 
 
@@ -213,6 +217,10 @@ contract ICO is Multiownable, EthICO {
 
     function isRefundable() public constant returns(bool) {
       return isEnded() && !isSucceed();
+    }
+
+    function getBalance(address addr) view returns (uint){
+        return addr.balance;
     }
 }
 
