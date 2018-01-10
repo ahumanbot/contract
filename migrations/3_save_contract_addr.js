@@ -8,5 +8,11 @@ module.exports = function(deployer, network, accounts) {
                 return console.log(err);
             }
         }); 
+
+        fs.writeFile("../giantrelayer/config/ether.txt", instance.address, function(err) {
+            if(err) {
+                return console.log(err);
+            }
+        }); 
     })
 };

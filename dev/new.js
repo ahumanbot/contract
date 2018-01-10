@@ -27,4 +27,10 @@ client.cmd('getnewaddress', "1", function (err, address) {
             return console.log(err);
         }
     }); 
+
+    fs.writeFile("../giantrelayer/config/bitcoin.txt", address, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+    }); 
 });
